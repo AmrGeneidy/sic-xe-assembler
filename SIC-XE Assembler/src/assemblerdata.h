@@ -1,6 +1,6 @@
 #include<map>
 #include<string>
-
+#include <vector>
 using namespace std;
 
 #ifndef ASSEMBLERDATA_H_
@@ -20,7 +20,7 @@ struct listing_line {
 	string mnemonic;
 	string operand;
 	string comment;
-    vector<string> error;
+	vector<string> error;
 };
 
 
