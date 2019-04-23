@@ -8,7 +8,7 @@ using namespace std;
 
 
 struct struct_opcode {
-	string opcode;
+	unsigned int opcode;
 	unsigned int format;
 };
 
