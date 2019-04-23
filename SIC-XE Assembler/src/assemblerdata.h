@@ -21,7 +21,7 @@ struct listing_line {
 	string mnemonic;
 	string operand;
 	string comment;
-    vector<string> error;
+	vector<string> error;
 };
 
 
