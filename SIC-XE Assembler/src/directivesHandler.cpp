@@ -5,12 +5,10 @@
  *      Author: OWNER
  */
 #include"assemblerdata.h"
+#include"utility.h"
 
 using namespace std;
-map<string, struct_opcode> opTable;
-map<unsigned int, listing_line> listing_table;
-map<string, unsigned int> symbol_table;
-unsigned int LOCCTR;
+
 bool handleByte(listing_line x);
 bool handleWord(listing_line x);
 bool handleRes(listing_line x, int increase_val);
