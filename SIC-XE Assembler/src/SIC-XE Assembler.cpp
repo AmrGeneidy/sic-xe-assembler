@@ -29,7 +29,7 @@ void loadOpTable(string path) {
 		smatch m;
 		regex_search(line, m, r);
 		opTable[m[1]].format = stoi(m[2]);
-		opTable[m[1]].opcode = m[3];
+		opTable[m[1]].opcode = stoi(m[3], 0, 16);
 		//TODO delete this line
 		//cout << m[1] << "      " << opTable[m[1]].format<< "      " << opTable[m[1]].opcode << endl ;
 	}

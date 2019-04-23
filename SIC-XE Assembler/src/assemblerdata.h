@@ -31,8 +31,9 @@ extern map<string, unsigned int> symbol_table;
 
 extern unsigned int starting_address;
 extern unsigned int program_length;
+extern unsigned int LOCCTR;
 
-
+bool handleDirective(listing_line x);
 
 //helping functions
 
