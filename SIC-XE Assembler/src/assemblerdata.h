@@ -34,7 +34,7 @@ extern unsigned int starting_address;
 extern unsigned int program_length;
 extern unsigned int LOCCTR;
 
-//extern bool handleDirective(listing_line x);
+bool handleDirective(listing_line x);
 
 
 

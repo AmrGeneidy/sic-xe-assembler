@@ -32,7 +32,7 @@ void loadOpTable(string path) {
         opTable[m[1]].format = stoi(m[2]);
         opTable[m[1]].opcode = stoi(m[3], 0, 16);
         //TODO delete this line
-        cout << m[1] << "      " << opTable[m[1]].format<< "      " << opTable[m[1]].opcode << endl ;
+        //cout << m[1] << "      " << opTable[m[1]].format<< "      " << opTable[m[1]].opcode << endl ;
     }
     infile.close();
 }
@@ -60,6 +60,8 @@ void build_listing_table(string path) {
                 listing_table[i].mnemonic = m[3];
                 listing_table[i].operand = m[5];
                 listing_table[i].comment = m[7];
+                cout << "hello"<<endl;
+                cout <<listing_table[i].label <<" " <<listing_table[i].mnemonic <<" "<< listing_table[i].operand <<" "<<listing_table[i].comment<<endl;
             } else {
                 listing_table[i].error.insert(listing_table[i].error.begin(), "Invalid Instruction");
             }
@@ -68,11 +70,19 @@ void build_listing_table(string path) {
     }
     infile.close();
 }
+//
+//void write_listing_file(){
+//	for (auto const& x : listing_table)
+//	{
+//	    cout << x.first  << "  " << x.second << endl ;
+//	}
+//
+//}
 
 void pass1_Algorithm(string codePath) {
-    //TODO load listing_table
+    build_listing_table(codePath);
     loadOpTable("optable.txt");
-    current_line_number = 1;
+    current_line_number = 0;
 
     //skip the comments
     while (listing_table[current_line_number].isAllComment) {
@@ -119,7 +129,7 @@ void pass1_Algorithm(string codePath) {
                 } else {
                     LOCCTR += opTable[current_line.mnemonic].format;
                 }
-            } else if (false /*TODO handle all the directives*/) {
+            } else if (handleDirective(current_line)) {
 
             } else {
                 listing_table[current_line_number].error.push_back("Invalid operation code");
@@ -131,8 +141,11 @@ void pass1_Algorithm(string codePath) {
 
 }
 
+
 int main() {
-//    build_listing_table("inputFile.txt");
-    loadOpTable("optable.txt");
+	cout <<"starting" << endl;
+	pass1_Algorithm("input.txt");
+	cout <<listing_table[5].address << " " << listing_table[5].label << " " << listing_table[5].mnemonic << " " << listing_table[5].operand << endl;
+	//write_listing_file();
     return 0;
 }
