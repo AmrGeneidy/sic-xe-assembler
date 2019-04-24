@@ -8,7 +8,7 @@ BGN      LDA     ALPHA
          STA     BETA
          J       *
 .
-THREE    WORD    3
+THREE    WORD    3	.comment
 ALPHA    RESW    1
 BETA     RESW    1
 INCR     RESW    1

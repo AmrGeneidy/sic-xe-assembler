@@ -50,23 +50,23 @@ bool handleByte(listing_line x) {
 			} catch (invalid_argument& e) {
 				return false;
 			}
-			if (!x.label.empty()) {
-				if (symbol_table.find(x.label) != symbol_table.end()) {
-					return false;
-				}
-				symbol_table[x.label] = LOCCTR;
-			}
+//			if (!x.label.empty()) {
+//				if (symbol_table.find(x.label) != symbol_table.end()) {
+//					return false;
+//				}
+//				symbol_table[x.label] = LOCCTR;
+//			}
 			LOCCTR += (x.operand.size() - 2) / 2;
 			return true;
 		}
 	} else if (x.operand[0] == 'c' || x.operand[0] == 'C') {
 		if (x.operand[1] == '\'' && x.operand[x.operand.size() - 1] == '\'') {
-			if (!x.label.empty()) {
-				if (symbol_table.find(x.label) != symbol_table.end()) {
-					return false;
-				}
-				symbol_table[x.label] = LOCCTR;
-			}
+//			if (!x.label.empty()) {
+//				if (symbol_table.find(x.label) != symbol_table.end()) {
+//					return false;
+//				}
+//				symbol_table[x.label] = LOCCTR;
+//			}
 			LOCCTR += x.operand.size() - 3;
 			return true;
 		}
@@ -80,30 +80,28 @@ bool handleWord(listing_line x) {
 	} catch (invalid_argument& e) {
 		return false;
 	}
-	if (!x.label.empty()) {
-		if (!x.label.empty()) {
-			if (symbol_table.find(x.label) != symbol_table.end()) {
-				return false;
-			}
-			symbol_table[x.label] = LOCCTR;
-		}
-		symbol_table[x.label] = LOCCTR;
-	}
+//	if (!x.label.empty()) {
+//		if (!x.label.empty()) {
+//			if (symbol_table.find(x.label) != symbol_table.end()) {
+//				return false;
+//			}
+//			symbol_table[x.label] = LOCCTR;
+//		}
+//		symbol_table[x.label] = LOCCTR;
+//	}
 	LOCCTR += 3;
 	return true;
 }
 bool handleRes(listing_line x, int increase_val) {
 	try {
 		int z = stoi(x.operand);
-		if (!x.label.empty()) {
-			if (!x.label.empty()) {
-				if (symbol_table.find(x.label) != symbol_table.end()) {
-					return false;
-				}
-				symbol_table[x.label] = LOCCTR;
-			}
-			symbol_table[x.label] = LOCCTR;
-		}
+//		if (!x.label.empty()) {
+//			if (symbol_table.find(x.label) != symbol_table.end()) {
+//				return false;
+//			}
+//			symbol_table[x.label] = LOCCTR;
+//		}
+
 		LOCCTR += increase_val * z;
 	} catch (invalid_argument& e) {
 		return false;
@@ -137,7 +135,7 @@ bool handleEqu(listing_line x) {
 	} else {
 		try {
 			int z = stoi(x.operand);
-			symbol_table[x.label]= z;
+			symbol_table[x.label] = z;
 		} catch (invalid_argument& e) {
 			return false;
 		}
@@ -146,12 +144,12 @@ bool handleEqu(listing_line x) {
 
 }
 
-bool handleBase(listing_line x){
+bool handleBase(listing_line x) {
 	if (!x.label.empty()) {
 		return false;
-	}else if (symbol_table.find(x.operand) != symbol_table.end()) {
+	} else if (symbol_table.find(x.operand) != symbol_table.end()) {
 
-	}else if (iequals("*", x.operand)) {
+	} else if (iequals("*", x.operand)) {
 
 	} else {
 		try {
