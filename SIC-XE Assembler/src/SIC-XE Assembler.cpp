@@ -36,6 +36,8 @@ bool is_mnemonicOrDirective(string x) {
 	string temp = getUpperVersion(x);
 	if ((opTable.find(temp) != opTable.end())||isDirective(temp)) {
 		return true;
+	}else if(temp.at(0) == '+' &&  opTable.find(temp.substr(1, temp.size() - 1)) != opTable.end()){
+		return true;
 	}
 	return false;
 }
@@ -65,7 +67,7 @@ bool parse_mnemonic(string x, int i) {
 }
 bool parse_operand(string x, int i) {
 	smatch m;
-	regex r("^(\\*|([#@]?\\w+)|(\\w+(\\,|\\+|\\-|\\*|\\/)\\w+))$");
+	regex r("^(\\*|([#@]?\\w+)|(\\w+(\\'|\\,|\\+|\\-|\\*|\\/)\\w+)(\\')?)$");
 	//regex r("^(\\*|([#@]?\\w+)|(\\w+[\\,\\+\\-\\*\\/]\\w+))$");
 	regex_search(x, m, r);
 	if (m.size() > 0) {
