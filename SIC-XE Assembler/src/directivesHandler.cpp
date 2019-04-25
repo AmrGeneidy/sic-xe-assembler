@@ -39,7 +39,8 @@ bool handleDirective(listing_line x) {
 	} else if (iequals(x.mnemonic, "base")) {
 		return handleBase(x);
 	} else if (iequals(x.mnemonic, "nobase")) {
-		if (x.operand.empty() && x.label.empty()) {
+		if (!(x.operand.empty() && x.label.empty())) {
+			return false;
 		}
 	} else {
 		return false;
@@ -51,14 +52,14 @@ bool handleByte(listing_line x) {
 		return false;
 	}
 	//TODO maxLength
-	if (x.operand[0] == 'x' || x.operand[0] == 'X') {
+	if ((x.operand[0] == 'x' || x.operand[0] == 'X')&& x.operand.size()%2 == 1) {
 		if (x.operand[1] == '\'' && x.operand[x.operand.size() - 1] == '\'') {
 			try {
-				stoi(x.operand, 0, 16);
+				stoi(x.operand.substr(2,x.operand.size() - 3), 0, 16);
 			} catch (invalid_argument& e) {
 				return false;
 			}
-			LOCCTR += (x.operand.size() - 2) / 2;
+			LOCCTR += (x.operand.size() - 3) / 2;
 			return true;
 		}
 	} else if (x.operand[0] == 'c' || x.operand[0] == 'C') {
@@ -70,7 +71,7 @@ bool handleByte(listing_line x) {
 	return false;
 }
 bool handleWord(listing_line x) {
-	//TODO handle operand 1,2,3 & #
+	//TODO handle operand 1,2,3
 	try {
 		stoi(x.operand);
 	} catch (invalid_argument& e) {
