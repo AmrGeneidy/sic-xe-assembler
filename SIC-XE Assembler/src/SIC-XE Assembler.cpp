@@ -13,7 +13,7 @@ using namespace std;
 
 map<string, struct_opcode> opTable;
 map<unsigned int, listing_line> listing_table;
-map<string, unsigned int> symbol_table;
+map<string, symbol_struct> symbol_table;
 
 unsigned int starting_address;
 unsigned int program_length;
@@ -126,7 +126,6 @@ void build_listing_table(string path) {
 	infile.open(path);
 	int i = 0;
 	while (getline(infile, line)) {
-		cout << line << endl;
 		regex rComment("^(\\.)(.*)");
 		smatch m;
 		regex_search(line, m, rComment);
@@ -209,7 +208,7 @@ void pass1_Algorithm(string codePath) {
 							"symbol '" + current_line.label
 									+ "' is already defined");
 				} else {
-					symbol_table[label] = LOCCTR;
+					symbol_table[label].address = LOCCTR;
 				}
 			}
 

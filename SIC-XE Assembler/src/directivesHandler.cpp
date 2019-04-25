@@ -94,7 +94,7 @@ bool handleOrg(listing_line x) {
 	if (!x.label.empty()) {
 		return false;
 	} else if (symbol_table.find(operand) != symbol_table.end()) {
-		LOCCTR = symbol_table[operand];
+		LOCCTR = symbol_table[operand].address;
 	} else {
 		try {
 			int z = stoi(x.operand);
@@ -112,13 +112,13 @@ bool handleEqu(listing_line x) {
 	if (x.label.empty()) {
 		return false;
 	} else if (symbol_table.find(operand) != symbol_table.end()) {
-		symbol_table[label] = symbol_table[operand];
+		symbol_table[label].address = symbol_table[operand].address;
 	} else if (iequals("*", operand)) {
-		symbol_table[label] = LOCCTR;
+		symbol_table[label].address = LOCCTR;
 	} else {
 		try {
 			int z = stoi(x.operand);
-			symbol_table[label] = z;
+			symbol_table[label].address = z;
 		} catch (invalid_argument& e) {
 			return false;
 		}

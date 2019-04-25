@@ -24,11 +24,16 @@ struct listing_line {
 	vector<string> error;
 };
 
+struct symbol_struct{
+	unsigned int address;
+	char type;
+	symbol_struct() : address(0), type('R') {}
 
+};
 extern map<string, struct_opcode> opTable;
 extern map<unsigned int, listing_line> listing_table;
 //key: label name ,  value: address
-extern map<string, unsigned int> symbol_table;
+extern map<string, symbol_struct> symbol_table;
 
 extern unsigned int starting_address;
 extern unsigned int program_length;
