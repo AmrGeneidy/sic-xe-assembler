@@ -10,6 +10,6 @@ BGN      LDA     ALPHA
 .
 THREE    WORD    3	.comment
 ALPHA    RESW    1
-BETA     RESW    1
+BETA     RESb    5
 INCR     RESW    1
          END     BGN 

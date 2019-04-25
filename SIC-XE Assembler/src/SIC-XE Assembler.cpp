@@ -22,6 +22,90 @@ unsigned int current_line_number;
 unsigned int LOCCTR;
 listing_line current_line;
 
+bool is_mnemonicOrDirective(string x);
+bool parse_label(string x, int i);
+bool parse_mnemonic(string x, int i);
+bool parse_operand(string x, int i);
+bool parse_instruction(string x[], int i);
+void loadOpTable(string path);
+void build_listing_table(string path);
+void write_listing_file();
+void pass1_Algorithm(string codePath);
+
+bool is_mnemonicOrDirective(string x) {
+	string temp = getUpperVersion(x);
+	if ((opTable.find(temp) != opTable.end())||isDirective(temp)) {
+		return true;
+	}
+	return false;
+}
+bool parse_label(string x, int i) {
+	smatch m;
+	regex r("^([A-Za-z]\\w*)$");
+	regex_search(x, m, r);
+	if (m.size() > 0) {
+		listing_table[i].label = m[1].str();
+		return true;
+	}
+	return false;
+}
+
+bool parse_mnemonic(string x, int i) {
+	smatch m;
+	regex r("^(\\+?(\\w+))$");
+	regex_search(x, m, r);
+	if (m.size() > 0) {
+		if (m[1].str().at(0) == '+') {
+			listing_table[i].isFormat4 = true;
+		}
+		listing_table[i].mnemonic = m[2].str();
+		return true;
+	}
+	return false;
+}
+bool parse_operand(string x, int i) {
+	smatch m;
+	regex r("^(\\*|([#@]?\\w+)|(\\w+(\\,|\\+|\\-|\\*|\\/)\\w+))$");
+	//regex r("^(\\*|([#@]?\\w+)|(\\w+[\\,\\+\\-\\*\\/]\\w+))$");
+	regex_search(x, m, r);
+	if (m.size() > 0) {
+		listing_table[i].operand = m[1].str();
+		return true;
+	}
+	return false;
+}
+
+//3 cases
+bool parse_instruction(string x[], int i) {
+	bool noError = true;
+	//case 1 mnemonic only
+	if (x[0].empty() && !x[1].empty() && x[2].empty()) {
+		noError = parse_mnemonic(x[1], i);
+	} //case 2 label, mnemonic and operand exists
+	else if (!x[0].empty() && !x[1].empty() && !x[2].empty()) {
+		noError = parse_label(x[0], i);
+		noError = parse_mnemonic(x[1], i);
+		noError = parse_operand(x[2], i);
+	} //case 3 (label and mnemonic) OR (mnemonic and operand)
+	else if (!x[0].empty() && !x[1].empty() && x[2].empty()) {
+		//label and mnemonic
+		if(is_mnemonicOrDirective(x[1])){
+			noError = parse_label(x[0], i);
+			noError = parse_mnemonic(x[1], i);
+		}//mnemonic and operand
+		else if(is_mnemonicOrDirective(x[0])){
+			noError = parse_mnemonic(x[0], i);
+			noError = parse_operand(x[1], i);
+		}else {
+			return false;
+		}
+	}else{
+		return false;
+	}
+	return noError;
+
+}
+
 void loadOpTable(string path) {
 	string line;
 	ifstream infile;
@@ -30,10 +114,8 @@ void loadOpTable(string path) {
 		regex r("(\\w+)\\s+(\\w+)\\s+(\\w+)");
 		smatch m;
 		regex_search(line, m, r);
-		opTable[m[1]].format = stoi(m[2]);
-		opTable[m[1]].opcode = stoi(m[3], 0, 16);
-		//TODO delete this line
-		//cout << m[1] << "      " << opTable[m[1]].format<< "      " << opTable[m[1]].opcode << endl ;
+		opTable[m[1].str()].format = stoi(m[2].str());
+		opTable[m[1].str()].opcode = stoi(m[3].str(), 0, 16);
 	}
 	infile.close();
 }
@@ -45,29 +127,26 @@ void build_listing_table(string path) {
 	int i = 0;
 	while (getline(infile, line)) {
 		cout << line << endl;
-
 		regex rComment("^(\\.)(.*)");
 		smatch m;
 		regex_search(line, m, rComment);
 		if (m.size() > 0 && m.position(0) == 0) {
 			listing_table[i].isAllComment = true;
-			listing_table[i].comment = m[0];
+			listing_table[i].comment = m[0].str();
 			i++;
 			continue;
 		} else {
+			//ensure that label, mnemonic and operand don't start with "." (comment filter)
 			regex rInstruction(
-					"^\\s*(\\w+(\\s+)){0,1}?(\\+?\\w+)\\s*(\\s+(\\*|[#@=]?\\w+))?\\s*(\\s+(\\..*))?$");
-
+					"^\\s*(([^\\.]\\S*)\\s+)?([^\\.]\\S*)\\s*(\\s+([^\\.]\\S*))?\\s*(\\s+(\\..*))?$");
 			regex_search(line, m, rInstruction);
 			if (m.size() > 0) {
-				listing_table[i].isAllComment = false;
-				//TODO handle case label and mnemonic only
-				listing_table[i].label = m[1];
-				listing_table[i].mnemonic = m[3];
-				listing_table[i].operand = m[5];
-				listing_table[i].comment = m[7];
-				//cout << "hello"<<endl;
-				//cout <<listing_table[i].label <<listing_table[i].mnemonic <<" "<< listing_table[i].operand <<" "<<listing_table[i].comment<<endl;
+				listing_table[i].comment = m[7].str();
+				string instruction[] = { m[2].str(), m[3].str(), m[5].str() };
+					if(!parse_instruction(instruction, i)){
+					listing_table[i].error.insert(listing_table[i].error.begin(),
+							"Invalid Instruction");
+				}
 			} else {
 				listing_table[i].error.insert(listing_table[i].error.begin(),
 						"Invalid Instruction");
@@ -96,7 +175,6 @@ void write_listing_file() {
 
 void pass1_Algorithm(string codePath) {
 	build_listing_table(codePath);
-	loadOpTable("optable.txt");
 	current_line_number = 0;
 
 	//skip the comments
@@ -124,29 +202,32 @@ void pass1_Algorithm(string codePath) {
 		if (!current_line.isAllComment) {
 			//process the label field
 			if (!current_line.label.empty()) {
-				if (symbol_table.find(current_line.label) != symbol_table.end()
-						&& !iequals(current_line.mnemonic, "EQU")) {
+				//save the label in symbol table in upper case form
+				string label = getUpperVersion(current_line.label);
+				if (symbol_table.find(label) != symbol_table.end()) {
 					listing_table[current_line_number].error.push_back(
 							"symbol '" + current_line.label
 									+ "' is already defined");
 				} else {
-					symbol_table[current_line.label] = LOCCTR;
+					symbol_table[label] = LOCCTR;
 				}
 			}
 
 			//process the mnemonic
-			if (opTable.find(current_line.mnemonic) != opTable.end()) {
+			string mnemonic = getUpperVersion(current_line.mnemonic);
+
+			if (opTable.find(mnemonic) != opTable.end()) {
 				//not directive
-				if (opTable[current_line.mnemonic].format == 3
+				if (opTable[mnemonic].format == 3
 						&& current_line.isFormat4) {
 					LOCCTR += 4;
-				} else if (opTable[current_line.mnemonic].format == 2
+				} else if (opTable[mnemonic].format == 2
 						&& current_line.isFormat4) {
 					listing_table[current_line_number].error.push_back(
 							"Can't use format 4 with mnemonic "
 									+ current_line.mnemonic);
 				} else {
-					LOCCTR += opTable[current_line.mnemonic].format;
+					LOCCTR += opTable[mnemonic].format;
 				}
 			} else if (handleDirective(current_line)) {
 
@@ -157,16 +238,14 @@ void pass1_Algorithm(string codePath) {
 		}				//end line process
 		current_line = listing_table[++current_line_number];
 	}
+	listing_table[current_line_number].address = LOCCTR;
 	program_length = LOCCTR - starting_address;
 
 }
 
 int main() {
-	cout << "starting" << endl;
+	loadOpTable("optable.txt");
 	pass1_Algorithm("input.txt");
-//	cout << listing_table[5].address << " " << listing_table[5].label << " "
-//			<< listing_table[5].mnemonic << " " << listing_table[5].operand
-//			<< endl;
 	write_listing_file();
 	return 0;
 }

@@ -15,6 +15,14 @@ bool handleRes(listing_line x, int increase_val);
 bool handleOrg(listing_line x);
 bool handleEqu(listing_line x);
 bool handleBase(listing_line x);
+
+bool isDirective(string x){
+	if (iequals(x, "START")||iequals(x, "END")||iequals(x, "BYTE")||iequals(x, "WORD")||iequals(x, "RESW")||iequals(x, "RESB")||iequals(x, "EQU")||iequals(x, "ORG")||iequals(x, "BASE")||iequals(x, "NOBASE")) {
+		return true;
+	}
+	return false;
+}
+
 bool handleDirective(listing_line x) {
 	if (iequals(x.mnemonic, "byte")) {
 		return handleByte(x);
@@ -50,23 +58,11 @@ bool handleByte(listing_line x) {
 			} catch (invalid_argument& e) {
 				return false;
 			}
-//			if (!x.label.empty()) {
-//				if (symbol_table.find(x.label) != symbol_table.end()) {
-//					return false;
-//				}
-//				symbol_table[x.label] = LOCCTR;
-//			}
 			LOCCTR += (x.operand.size() - 2) / 2;
 			return true;
 		}
 	} else if (x.operand[0] == 'c' || x.operand[0] == 'C') {
 		if (x.operand[1] == '\'' && x.operand[x.operand.size() - 1] == '\'') {
-//			if (!x.label.empty()) {
-//				if (symbol_table.find(x.label) != symbol_table.end()) {
-//					return false;
-//				}
-//				symbol_table[x.label] = LOCCTR;
-//			}
 			LOCCTR += x.operand.size() - 3;
 			return true;
 		}
@@ -80,28 +76,12 @@ bool handleWord(listing_line x) {
 	} catch (invalid_argument& e) {
 		return false;
 	}
-//	if (!x.label.empty()) {
-//		if (!x.label.empty()) {
-//			if (symbol_table.find(x.label) != symbol_table.end()) {
-//				return false;
-//			}
-//			symbol_table[x.label] = LOCCTR;
-//		}
-//		symbol_table[x.label] = LOCCTR;
-//	}
 	LOCCTR += 3;
 	return true;
 }
 bool handleRes(listing_line x, int increase_val) {
 	try {
 		int z = stoi(x.operand);
-//		if (!x.label.empty()) {
-//			if (symbol_table.find(x.label) != symbol_table.end()) {
-//				return false;
-//			}
-//			symbol_table[x.label] = LOCCTR;
-//		}
-
 		LOCCTR += increase_val * z;
 	} catch (invalid_argument& e) {
 		return false;
@@ -110,10 +90,11 @@ bool handleRes(listing_line x, int increase_val) {
 }
 
 bool handleOrg(listing_line x) {
+	string operand = getUpperVersion(x.operand);
 	if (!x.label.empty()) {
 		return false;
-	} else if (symbol_table.find(x.operand) != symbol_table.end()) {
-		LOCCTR = symbol_table[x.operand];
+	} else if (symbol_table.find(operand) != symbol_table.end()) {
+		LOCCTR = symbol_table[operand];
 	} else {
 		try {
 			int z = stoi(x.operand);
@@ -126,16 +107,18 @@ bool handleOrg(listing_line x) {
 }
 
 bool handleEqu(listing_line x) {
+	string label = getUpperVersion(x.label);
+	string operand = getUpperVersion(x.operand);
 	if (x.label.empty()) {
 		return false;
-	} else if (symbol_table.find(x.operand) != symbol_table.end()) {
-		symbol_table[x.label] = symbol_table[x.operand];
-	} else if (iequals("*", x.operand)) {
-		symbol_table[x.label] = LOCCTR;
+	} else if (symbol_table.find(operand) != symbol_table.end()) {
+		symbol_table[label] = symbol_table[operand];
+	} else if (iequals("*", operand)) {
+		symbol_table[label] = LOCCTR;
 	} else {
 		try {
 			int z = stoi(x.operand);
-			symbol_table[x.label] = z;
+			symbol_table[label] = z;
 		} catch (invalid_argument& e) {
 			return false;
 		}
@@ -145,11 +128,12 @@ bool handleEqu(listing_line x) {
 }
 
 bool handleBase(listing_line x) {
+	string operand = getUpperVersion(x.operand);
 	if (!x.label.empty()) {
 		return false;
-	} else if (symbol_table.find(x.operand) != symbol_table.end()) {
+	} else if (symbol_table.find(operand) != symbol_table.end()) {
 
-	} else if (iequals("*", x.operand)) {
+	} else if (iequals("*", operand)) {
 
 	} else {
 		try {

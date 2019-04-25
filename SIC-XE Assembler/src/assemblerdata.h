@@ -35,7 +35,6 @@ extern unsigned int program_length;
 extern unsigned int LOCCTR;
 
 bool handleDirective(listing_line x);
-
-
+bool isDirective(string x);
 
 #endif /* ASSEMBLERDATA_H_ */

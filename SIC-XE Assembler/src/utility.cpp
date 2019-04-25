@@ -1,6 +1,13 @@
 #include"utility.h"
 
+using namespace std;
 //helping functions
+
+string getUpperVersion(string x){
+	string temp;
+	transform(x.begin(), x.end(), back_inserter(temp), ::toupper);
+	return temp;
+}
 
 //iequals function check equality of two strings CASE-INSENSITIVE
 struct iequal {
