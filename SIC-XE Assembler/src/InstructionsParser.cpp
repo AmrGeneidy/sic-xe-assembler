@@ -119,6 +119,3 @@ void build_listing_table(string path) {
 	}
 	infile.close();
 }
-
-
-

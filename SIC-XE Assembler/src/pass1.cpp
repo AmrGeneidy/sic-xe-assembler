@@ -22,7 +22,6 @@ unsigned int current_line_number;
 unsigned int LOCCTR;
 listing_line current_line;
 
-
 void loadOpTable(string path) {
 	string line;
 	ifstream infile;
@@ -98,8 +97,7 @@ void pass1_Algorithm(string codePath) {
 
 			if (opTable.find(mnemonic) != opTable.end()) {
 				//not directive
-				if (opTable[mnemonic].format == 3
-						&& current_line.isFormat4) {
+				if (opTable[mnemonic].format == 3 && current_line.isFormat4) {
 					LOCCTR += 4;
 				} else if (opTable[mnemonic].format == 2
 						&& current_line.isFormat4) {
@@ -124,8 +122,19 @@ void pass1_Algorithm(string codePath) {
 }
 
 int main() {
+	//Enter "pass1 pass1 <input-file-name>" to start
+	//pass1 input.txt
+
 	loadOpTable("optable.txt");
-	pass1_Algorithm("input.txt");
+
+	string input;
+    getline (cin, input);
+	smatch m;
+	regex r("^pass1\\s+(\\S+)$");
+	regex_search(input, m, r);
+	if (m.size() > 0) {
+		pass1_Algorithm(m[1].str());
+	}
 	write_listing_file();
 	return 0;
 }
