@@ -39,6 +39,7 @@ extern unsigned int starting_address;
 extern unsigned int program_length;
 extern unsigned int LOCCTR;
 
+void build_listing_table(string path);
 bool handleDirective(listing_line x);
 bool isDirective(string x);
 
