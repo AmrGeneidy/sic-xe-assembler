@@ -58,7 +58,6 @@ void write_listing_file() {
 		else if (!listing_table[i - 1].error.empty()) {
 			flag = true;
 		}
-		cout << i << endl;
 		if (i < 10) {
 			file << i;
 			file << "        ";
@@ -78,12 +77,8 @@ void write_listing_file() {
 			res = "0" + res;
 			temp--;
 		}
-		cout << "address: " << itr->second.address << endl;
 		file << res;
 		file << "  ";
-		cout << "label: " << itr->second.label << endl << "mnemonic: "
-				<< itr->second.mnemonic << endl;
-
 		file << itr->second.label;
 		unsigned int spaces2 = 9-itr->second.label.size();
 		while(spaces2 > 0){
@@ -103,9 +98,6 @@ void write_listing_file() {
 			file << " ";
 			spaces1--;
 		}
-		cout << "operand: " << itr->second.operand << endl << "comment: "
-
-		<< itr->second.comment << endl;
 
 		file << itr->second.operand;
 		unsigned int spaces = 17 - itr->second.operand.size();

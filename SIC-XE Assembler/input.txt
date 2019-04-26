@@ -1,6 +1,5 @@
 .234567890123456789
 LAB2C    START   1000
-         +SUB    #12
          LDA     ALPHA
          LDB     #10
          LDX     #0
