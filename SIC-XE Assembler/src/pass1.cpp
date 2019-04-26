@@ -185,11 +185,12 @@ void pass1_Algorithm(string codePath) {
 }
 
 int main() {
-	//Enter "pass1 pass1 <input-file-name>" to start
+	//Enter "pass1 <input-file-name>" to start
 	//pass1 input.txt
 
 	loadOpTable("optable.txt");
 
+	cout << "Enter 'pass1 <input-file-name>' to start, Ex : pass1 input.txt" <<endl;
 	string input;
 	getline(cin, input);
 	smatch m;

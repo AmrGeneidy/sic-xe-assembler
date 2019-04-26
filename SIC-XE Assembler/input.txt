@@ -20,7 +20,7 @@ LOOP     LDCH    STRING,X
          TIX     #5
          JLT     LOOP
 FOUND    J       OUT
-ALPHA    WORD    2
+ALPHA    WORD    1,2
 SAVEW    RESW    2
 HEXCHAR  BYTE    X'61'
 INPUT    RESB    1
