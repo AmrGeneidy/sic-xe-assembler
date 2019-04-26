@@ -37,19 +37,81 @@ void loadOpTable(string path) {
 }
 
 void write_listing_file() {
+	ofstream file;
+	file.open("ListingTable.txt");
+	file << "Line no. Address Label    Mnemonic  Operand          Comments\n\n";
 	map<unsigned int, listing_line>::iterator itr;
 	int i = 0;
+	bool flag = false;
 	for (itr = listing_table.begin(); itr != listing_table.end(); itr++) {
 		i++;
+		if (flag) {
+			unsigned int t = 0;
+			for (t = 0; t < listing_table[i - 2].error.size(); t++) {
+				file << "      ****Error: ";
+				file << listing_table[i - 2].error.at(t);
+				file << "\n";
+			}
+			flag = false;
+		}
+		if (!listing_table[i - 1].error.empty()) {
+			flag = true;
+		}
 		cout << i << endl;
+		if (i < 10) {
+			file << i;
+			file << "        ";
+		} else if (i < 100) {
+			file << i;
+			file << "       ";
+		} else if (i < 1000) {
+			file << i;
+			file << "      ";
+		}
+		std::stringstream ss;
+		ss << std::hex << itr->second.address; // int decimal_value
+		std::string res(ss.str());
+
+		int temp = 6 - res.length();
+		while (temp > 0) {
+			res = "0" + res;
+			temp--;
+		}
 		cout << "address: " << itr->second.address << endl;
+		file << res;
+		file << " ";
 		cout << "label: " << itr->second.label << endl << "mnemonic: "
 				<< itr->second.mnemonic << endl;
-		cout << "operand: " << itr->second.operand << endl << "comment: "
-				<< itr->second.comment << endl;
-//		cout<<itr->second.error.empty()?"":itr->second.error[0];
-	}
+		if (itr->second.label.empty()) {
+			file << "         ";
+		} else {
+			file << itr->second.label;
+		}
 
+		if (itr->second.isFormat4){
+			file << '+'<<itr->second.mnemonic;
+		}else{
+			file << itr->second.mnemonic;
+		}
+		unsigned int spaces1 = 10 - itr->second.mnemonic.size();
+		while (spaces1 > 0) {
+			file << " ";
+			spaces1--;
+		}
+		cout << "operand: " << itr->second.operand << endl << "comment: "
+
+		<< itr->second.comment << endl;
+
+		file << itr->second.operand;
+		unsigned int spaces = 17 - itr->second.operand.size();
+		while (spaces > 0) {
+			file << " ";
+			spaces--;
+		}
+		file << itr->second.comment;
+		file << "\n";
+	}
+	file.close();
 }
 
 void pass1_Algorithm(string codePath) {
@@ -128,7 +190,7 @@ int main() {
 	loadOpTable("optable.txt");
 
 	string input;
-    getline (cin, input);
+	getline(cin, input);
 	smatch m;
 	regex r("^pass1\\s+(\\S+)$");
 	regex_search(input, m, r);
