@@ -24,17 +24,19 @@ unsigned int LOCCTR;
 listing_line current_line;
 
 void loadOpTable(string path) {
-	string line;
-	ifstream infile;
-	infile.open(path);
-	while (getline(infile, line)) {
-		regex r("(\\w+)\\s+(\\w+)\\s+(\\w+)");
-		smatch m;
-		regex_search(line, m, r);
-		opTable[m[1].str()].format = stoi(m[2].str());
-		opTable[m[1].str()].opcode = stoi(m[3].str(), 0, 16);
+	if(exists_test0(path)){
+		string line;
+		ifstream infile;
+		infile.open(path);
+		while (getline(infile, line)) {
+			regex r("(\\w+)\\s+(\\w+)\\s+(\\w+)");
+			smatch m;
+			regex_search(line, m, r);
+			opTable[m[1].str()].format = stoi(m[2].str());
+			opTable[m[1].str()].opcode = stoi(m[3].str(), 0, 16);
+		}
+		infile.close();
 	}
-	infile.close();
 }
 void write_symbol_table(){
 	ofstream file;
@@ -90,7 +92,6 @@ void write_listing_file() {
 		else if (!listing_table[i - 1].error.empty()) {
 			flag = true;
 		}
-		cout << i << endl;
 		if (i < 10) {
 			file << i;
 			file << "        ";
@@ -110,12 +111,8 @@ void write_listing_file() {
 			res = "0" + res;
 			temp--;
 		}
-		cout << "address: " << itr->second.address << endl;
 		file << res;
 		file << "  ";
-		cout << "label: " << itr->second.label << endl << "mnemonic: "
-				<< itr->second.mnemonic << endl;
-
 		file << itr->second.label;
 		unsigned int spaces2 = 9-itr->second.label.size();
 		while(spaces2 > 0){
@@ -135,9 +132,6 @@ void write_listing_file() {
 			file << " ";
 			spaces1--;
 		}
-		cout << "operand: " << itr->second.operand << endl << "comment: "
-
-		<< itr->second.comment << endl;
 
 		file << itr->second.operand;
 		unsigned int spaces = 17 - itr->second.operand.size();
@@ -213,7 +207,13 @@ void pass1_Algorithm(string codePath) {
 						"Invalid operation code");
 			}
 		}				//end line process
-		current_line = listing_table[++current_line_number];
+
+		++current_line_number;
+		if(listing_table.find(current_line_number) == listing_table.end()){
+			listing_table[current_line_number - 1].error.push_back("There is no End directive");
+			break;
+		}
+		current_line = listing_table[current_line_number];
 	}
 	listing_table[current_line_number].address = LOCCTR;
 	program_length = LOCCTR - starting_address;
@@ -221,18 +221,25 @@ void pass1_Algorithm(string codePath) {
 }
 
 int main() {
-	//Enter "pass1 pass1 <input-file-name>" to start
+	//Enter "pass1 <input-file-name>" to start
 	//pass1 input.txt
 
 	loadOpTable("optable.txt");
-
-	string input;
-	getline(cin, input);
-	smatch m;
-	regex r("^pass1\\s+(\\S+)$");
-	regex_search(input, m, r);
-	if (m.size() > 0) {
-		pass1_Algorithm(m[1].str());
+	bool error = true;
+	while(error){
+		cout << "Enter 'pass1 <input-file-name>' to start, Ex : pass1 input.txt" <<endl;
+		string input;
+		getline(cin, input);
+		smatch m;
+		regex r("^pass1\\s+(\\S+)$");
+		regex_search(input, m, r);
+		if (m.size() > 0) {
+			error = false;
+			pass1_Algorithm(m[1].str());
+			write_listing_file();
+		}else{
+			cout << "File name format is not correct" <<endl<<endl;
+		}
 	}
 	write_listing_file();
 	write_symbol_table();

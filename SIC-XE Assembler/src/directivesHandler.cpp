@@ -13,21 +13,18 @@ int address;
 int arrayLength;
 bool isArray(string exp) {
 	smatch m;
-	regex r("-?\\d(\\,-?\\d)+");
+	regex r("-?\\d+(\\,-?\\d+)+");
 	if (regex_match(exp, m, r)) {
-		std::vector<int> vect;
+		 stringstream ss( exp );
+		    vector<string> result;
 
-		std::stringstream ss(exp);
-
-		int i;
-
-		while (ss >> i) {
-			vect.push_back(i);
-
-			if (ss.peek() == ',')
-				ss.ignore();
-		}
-		arrayLength = vect.size();
+		    while( ss.good() )
+		    {
+		        string substr;
+		        getline( ss, substr, ',' );
+		        result.push_back( substr );
+		    }
+		    arrayLength = result.size();
 		return true;
 	}
 	return false;
@@ -230,15 +227,16 @@ bool handleByte(listing_line x) {
 }
 bool handleWord(listing_line x) {
 	//TODO handle operand 1,2,3
-	try {
-		stoi(x.operand);
-		LOCCTR += 3;
-	} catch (invalid_argument& e) {
-		if (isArray(x.operand)) {
-			LOCCTR += 3 * arrayLength;
-		} else
+	if (isArray(x.operand)) {
+		LOCCTR += 3 * arrayLength;
+	} else
+		try {
+			stoi(x.operand);
+			LOCCTR += 3;
+		} catch (invalid_argument& e) {
+
 			return false;
-	}
+		}
 
 	return true;
 }
@@ -259,18 +257,17 @@ bool handleOrg(listing_line x) {
 	} else if (symbol_table.find(operand) != symbol_table.end()) {
 		LOCCTR = symbol_table[operand].address;
 		return true;
+	} else if (operand[0] == '*' && operand.size() == 1) {
+		return true;
+	} else if (isRelocatable(operand)) {
+		LOCCTR = address;
+		return true;
 	}
 	try {
 		int z = stoi(x.operand);
 		LOCCTR = z;
 		return true;
 	} catch (invalid_argument& e) {
-		if (operand[0] == '*' && operand.size() == 1) {
-			return true;
-		} else if (isRelocatable(operand)) {
-			LOCCTR = address;
-			return true;
-		}
 		return false;
 	}
 
@@ -286,18 +283,20 @@ bool handleEqu(listing_line x) {
 	} else if (iequals("*", operand)) {
 		symbol_table[label].address = LOCCTR;
 	} else {
+
+		if (isRelocatable(operand)) {
+			symbol_table[label].address = address;
+			return true;
+		} else if (isAbslute(operand)) {
+			symbol_table[label].address = address;
+			symbol_table[label].type = 'A';
+			return true;
+		}
 		try {
 			int z = stoi(x.operand);
 			symbol_table[label].address = z;
 		} catch (invalid_argument& e) {
-			if (isRelocatable(operand)) {
-				symbol_table[label].address = address;
-				return true;
-			} else if (isAbslute(operand)) {
-				symbol_table[label].address = address;
-				symbol_table[label].type = 'A';
-				return true;
-			}
+
 			return false;
 		}
 	}
@@ -315,11 +314,11 @@ bool handleBase(listing_line x) {
 
 	} else {
 		try {
-			int z = stoi(x.operand);
-		} catch (invalid_argument& e) {
 			if (isRelocatable(operand)) {
 				return true;
 			}
+			stoi(x.operand);
+		} catch (invalid_argument& e) {
 			return false;
 		}
 	}
