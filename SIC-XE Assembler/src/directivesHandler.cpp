@@ -13,21 +13,18 @@ int address;
 int arrayLength;
 bool isArray(string exp) {
 	smatch m;
-	regex r("-?\\d(\\,-?\\d)+");
+	regex r("-?\\d+(\\,-?\\d+)+");
 	if (regex_match(exp, m, r)) {
-		std::vector<int> vect;
+		 stringstream ss( exp );
+		    vector<string> result;
 
-		std::stringstream ss(exp);
-
-		int i;
-
-		while (ss >> i) {
-			vect.push_back(i);
-
-			if (ss.peek() == ',')
-				ss.ignore();
-		}
-		arrayLength = vect.size();
+		    while( ss.good() )
+		    {
+		        string substr;
+		        getline( ss, substr, ',' );
+		        result.push_back( substr );
+		    }
+		    arrayLength = result.size();
 		return true;
 	}
 	return false;
