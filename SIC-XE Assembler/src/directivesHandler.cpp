@@ -286,7 +286,7 @@ bool handleEqu(listing_line x) {
 		if (isRelocatable(operand)) {
 			symbol_table[label].address = address;
 			return true;
-		} else if (isAbslute(operand)) {
+		} else if (isAbsluteExp(operand)) {
 			symbol_table[label].address = address;
 			symbol_table[label].type = 'A';
 			return true;
