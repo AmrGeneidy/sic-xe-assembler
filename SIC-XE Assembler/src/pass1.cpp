@@ -55,7 +55,7 @@ void write_listing_file() {
 			}
 			flag = false;
 		}
-		if (!listing_table[i - 1].error.empty()) {
+		else if (!listing_table[i - 1].error.empty()) {
 			flag = true;
 		}
 		cout << i << endl;
@@ -80,21 +80,25 @@ void write_listing_file() {
 		}
 		cout << "address: " << itr->second.address << endl;
 		file << res;
-		file << " ";
+		file << "  ";
 		cout << "label: " << itr->second.label << endl << "mnemonic: "
 				<< itr->second.mnemonic << endl;
-		if (itr->second.label.empty()) {
-			file << "         ";
-		} else {
-			file << itr->second.label;
-		}
 
+		file << itr->second.label;
+		unsigned int spaces2 = 9-itr->second.label.size();
+		while(spaces2 > 0){
+			file << " ";
+			spaces2--;
+		}
 		if (itr->second.isFormat4){
 			file << '+'<<itr->second.mnemonic;
 		}else{
 			file << itr->second.mnemonic;
 		}
 		unsigned int spaces1 = 10 - itr->second.mnemonic.size();
+		if(itr->second.isFormat4){
+			spaces1--;
+		}
 		while (spaces1 > 0) {
 			file << " ";
 			spaces1--;
