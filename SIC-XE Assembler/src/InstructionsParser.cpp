@@ -51,7 +51,7 @@ bool parse_operand(string x, int i) {
 		listing_table[i].operand = m[1].str();
 		return true;
 	}
-	regex r2("^(-?\\d(\\,-?\\d)*)$");
+	regex r2("^(-?\\d+(\\,-?\\d+)+)$");
 	regex_search(x, m, r2);
 	if (m.size() > 0) {
 		listing_table[i].operand = m[1].str();
@@ -89,38 +89,42 @@ bool parse_instruction(string x[], int i) {
 }
 
 void build_listing_table(string path) {
-	string line;
-	ifstream infile;
-	infile.open(path);
-	int i = 0;
-	while (getline(infile, line)) {
-		regex rComment("^(\\.)(.*)");
-		smatch m;
-		regex_search(line, m, rComment);
-		if (m.size() > 0 && m.position(0) == 0) {
-			listing_table[i].isAllComment = true;
-			listing_table[i].comment = m[0].str();
-			i++;
-			continue;
-		} else {
-			//ensure that label, mnemonic and operand don't start with "." (comment filter)
-			regex rInstruction(
-					"^\\s*(([^\\.]\\S*)\\s+)?([^\\.]\\S*)\\s*(\\s+([^\\.]\\S*))?\\s*(\\s+(\\..*))?$");
-			regex_search(line, m, rInstruction);
-			if (m.size() > 0) {
-				listing_table[i].comment = m[7].str();
-				string instruction[] = { m[2].str(), m[3].str(), m[5].str() };
-				if (!parse_instruction(instruction, i)) {
+	if (exists_test0(path)) {
+		string line;
+		ifstream infile;
+		infile.open(path);
+		int i = 0;
+		while (getline(infile, line)) {
+			regex rComment("^(\\.)(.*)");
+			smatch m;
+			regex_search(line, m, rComment);
+			if (m.size() > 0 && m.position(0) == 0) {
+				listing_table[i].isAllComment = true;
+				listing_table[i].comment = m[0].str();
+				i++;
+				continue;
+			} else {
+				//ensure that label, mnemonic and operand don't start with "." (comment filter)
+				regex rInstruction(
+						"^\\s*(([^\\.]\\S*)\\s+)?([^\\.]\\S*)\\s*(\\s+([^\\.]\\S*))?\\s*(\\s+(\\..*))?$");
+				regex_search(line, m, rInstruction);
+				if (m.size() > 0) {
+					listing_table[i].comment = m[7].str();
+					string instruction[] =
+							{ m[2].str(), m[3].str(), m[5].str() };
+					if (!parse_instruction(instruction, i)) {
+						listing_table[i].error.insert(
+								listing_table[i].error.begin(),
+								"Invalid Instruction");
+					}
+				} else {
 					listing_table[i].error.insert(
 							listing_table[i].error.begin(),
 							"Invalid Instruction");
 				}
-			} else {
-				listing_table[i].error.insert(listing_table[i].error.begin(),
-						"Invalid Instruction");
 			}
+			i++;
 		}
-		i++;
+		infile.close();
 	}
-	infile.close();
 }

@@ -3,11 +3,17 @@
 using namespace std;
 //helping functions
 
+bool exists_test0 (const std::string& name) {
+    ifstream f(name.c_str());
+    return f.good();
+}
+
 string getUpperVersion(string x){
 	string temp;
 	transform(x.begin(), x.end(), back_inserter(temp), ::toupper);
 	return temp;
 }
+
 
 //iequals function check equality of two strings CASE-INSENSITIVE
 struct iequal {
