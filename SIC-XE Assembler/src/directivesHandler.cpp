@@ -8,7 +8,161 @@
 #include"utility.h"
 
 using namespace std;
+int address;
+int arrayLength;
+bool isArray(string exp) {
+	smatch m;
+	regex r("-?\\d(\\,-?\\d)+");
+	if (regex_match(exp, m, r)) {
+		std::vector<int> vect;
 
+		std::stringstream ss(exp);
+
+		int i;
+
+		while (ss >> i) {
+			vect.push_back(i);
+
+			if (ss.peek() == ',')
+				ss.ignore();
+		}
+		arrayLength = vect.size();
+		return true;
+	}
+	return false;
+}
+bool isInt(string op) {
+	try {
+		stoi(op);
+		return true;
+	} catch (invalid_argument& e) {
+		return false;
+	}
+}
+bool isRelative(string symbol) {
+	return symbol_table.find(symbol) != symbol_table.end()
+			&& symbol_table[symbol].type == 'R';
+}
+bool isAbslute(string symbol) {
+	return symbol_table.find(symbol) != symbol_table.end()
+			&& symbol_table[symbol].type == 'A';
+}
+bool isRelocatable(string exp) {
+	smatch m;
+	regex r("(\\w+)([\\+\\-\\*\\/])(\\w+)");
+	if (regex_match(exp, m, r)) {
+		string operand1 = getUpperVersion(m[1]);
+		string operat = getUpperVersion(m[2]);
+		string operand2 = getUpperVersion(m[3]);
+		if (iequals("+", operat)) {
+			if ((isRelative(operand1) && isAbslute(operand2))
+					|| (isRelative(operand2) && isAbslute(operand1))) {
+				address = symbol_table[operand1].address
+						+ symbol_table[operand2].address;
+				return address >= 0;
+			} else if (isRelative(operand1) && isInt(operand2)) {
+				address = symbol_table[operand1].address + stoi(operand2);
+				return address >= 0;
+			} else if (isRelative(operand2) && isInt(operand1)) {
+				address = symbol_table[operand2].address + stoi(operand1);
+				return address >= 0;
+			}
+		} else if (iequals("-", operat)) {
+			if (isRelative(operand1) && isInt(operand2)) {
+				address = symbol_table[operand1].address - stoi(operand2);
+				return address >= 0;
+			}
+		}
+	}
+	return false;
+}
+bool isAbsluteExp(string exp) {
+	smatch m;
+	regex r("(\\w+)([\\+\\-\\*\\/])(\\w+)");
+	if (regex_match(exp, m, r)) {
+		string operand1 = getUpperVersion(m[1]);
+		string operat = getUpperVersion(m[2]);
+		string operand2 = getUpperVersion(m[3]);
+		if (iequals("+", operat)) {
+			if (isAbslute(operand1) && isAbslute(operand2)) {
+				address = symbol_table[operand1].address
+						+ symbol_table[operand2].address;
+				return true;
+			} else if (isAbslute(operand1) && isInt(operand2)) {
+				address = symbol_table[operand1].address + stoi(operand2);
+				return true;
+			} else if (isAbslute(operand2) && isInt(operand1)) {
+				address = symbol_table[operand2].address + stoi(operand1);
+				return true;
+			} else if (isInt(operand1) && isInt(operand2)) {
+				address = stoi(operand1) + stoi(operand2);
+				return true;
+			} else {
+				return false;
+			}
+		} else if (iequals("-", operat)) {
+			if (isAbslute(operand1) && isAbslute(operand2)) {
+				address = symbol_table[operand1].address
+						- symbol_table[operand2].address;
+				return true;
+			} else if (isAbslute(operand1) && isInt(operand2)) {
+				address = symbol_table[operand1].address - stoi(operand2);
+				return true;
+			} else if (isAbslute(operand2) && isInt(operand1)) {
+				address = -symbol_table[operand2].address + stoi(operand1);
+				return true;
+			} else if (isInt(operand1) && isInt(operand2)) {
+				address = stoi(operand1) - stoi(operand2);
+				return true;
+			} else if (isRelative(operand1) && isRelative(operand2)) {
+				address = symbol_table[operand1].address
+						- symbol_table[operand2].address;
+				;
+				return true;
+			} else {
+				return false;
+			}
+		} else if (iequals("*", operat)) {
+			if (isAbslute(operand1) && isAbslute(operand2)) {
+				address = symbol_table[operand1].address
+						* symbol_table[operand2].address;
+				return true;
+			} else if (isAbslute(operand1) && isInt(operand2)) {
+				address = symbol_table[operand1].address * stoi(operand2);
+				return true;
+			} else if (isAbslute(operand2) && isInt(operand1)) {
+				address = symbol_table[operand2].address * stoi(operand1);
+				return true;
+			} else if (isInt(operand1) && isInt(operand2)) {
+				address = stoi(operand1) * stoi(operand2);
+				return true;
+			} else {
+				return false;
+			}
+		} else if (iequals("/", operat)) {
+			if (isAbslute(operand1) && isAbslute(operand2)) {
+				address = symbol_table[operand1].address
+						/ symbol_table[operand2].address;
+				return true;
+			} else if (isAbslute(operand1) && isInt(operand2)) {
+				address = symbol_table[operand1].address / stoi(operand2);
+				return true;
+			} else if (isAbslute(operand2) && isInt(operand1)) {
+				address = stoi(operand1) / symbol_table[operand2].address;
+				return true;
+			} else if (isInt(operand1) && isInt(operand2)) {
+				address = stoi(operand1) / stoi(operand2);
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	} else {
+		return false;
+	}
+}
 bool handleByte(listing_line x);
 bool handleWord(listing_line x);
 bool handleRes(listing_line x, int increase_val);
@@ -16,8 +170,11 @@ bool handleOrg(listing_line x);
 bool handleEqu(listing_line x);
 bool handleBase(listing_line x);
 
-bool isDirective(string x){
-	if (iequals(x, "START")||iequals(x, "END")||iequals(x, "BYTE")||iequals(x, "WORD")||iequals(x, "RESW")||iequals(x, "RESB")||iequals(x, "EQU")||iequals(x, "ORG")||iequals(x, "BASE")||iequals(x, "NOBASE")) {
+bool isDirective(string x) {
+	if (iequals(x, "START") || iequals(x, "END") || iequals(x, "BYTE")
+			|| iequals(x, "WORD") || iequals(x, "RESW") || iequals(x, "RESB")
+			|| iequals(x, "EQU") || iequals(x, "ORG") || iequals(x, "BASE")
+			|| iequals(x, "NOBASE")) {
 		return true;
 	}
 	return false;
@@ -51,11 +208,11 @@ bool handleByte(listing_line x) {
 	if (x.operand.size() < 3) {
 		return false;
 	}
-	//TODO maxLength
-	if ((x.operand[0] == 'x' || x.operand[0] == 'X')&& x.operand.size()%2 == 1) {
+	if ((x.operand[0] == 'x' || x.operand[0] == 'X')
+			&& x.operand.size() % 2 == 1) {
 		if (x.operand[1] == '\'' && x.operand[x.operand.size() - 1] == '\'') {
 			try {
-				stoi(x.operand.substr(2,x.operand.size() - 3), 0, 16);
+				stoi(x.operand.substr(2, x.operand.size() - 3), 0, 16);
 			} catch (invalid_argument& e) {
 				return false;
 			}
@@ -74,10 +231,14 @@ bool handleWord(listing_line x) {
 	//TODO handle operand 1,2,3
 	try {
 		stoi(x.operand);
+		LOCCTR += 3;
 	} catch (invalid_argument& e) {
-		return false;
+		if (isArray(x.operand)) {
+			LOCCTR += 3 * arrayLength;
+		} else
+			return false;
 	}
-	LOCCTR += 3;
+
 	return true;
 }
 bool handleRes(listing_line x, int increase_val) {
@@ -96,21 +257,28 @@ bool handleOrg(listing_line x) {
 		return false;
 	} else if (symbol_table.find(operand) != symbol_table.end()) {
 		LOCCTR = symbol_table[operand].address;
-	} else {
-		try {
-			int z = stoi(x.operand);
-			LOCCTR = z;
-		} catch (invalid_argument& e) {
-			return false;
-		}
+		return true;
 	}
-	return true;
+	try {
+		int z = stoi(x.operand);
+		LOCCTR = z;
+		return true;
+	} catch (invalid_argument& e) {
+		if (operand[0] == '*' && operand.size() == 1) {
+			return true;
+		} else if (isRelocatable(operand)) {
+			LOCCTR = address;
+			return true;
+		}
+		return false;
+	}
+
 }
 
 bool handleEqu(listing_line x) {
 	string label = getUpperVersion(x.label);
 	string operand = getUpperVersion(x.operand);
-	if (x.label.empty()) {
+	if (x.label.empty() || operand.empty()) {
 		return false;
 	} else if (symbol_table.find(operand) != symbol_table.end()) {
 		symbol_table[label].address = symbol_table[operand].address;
@@ -121,6 +289,14 @@ bool handleEqu(listing_line x) {
 			int z = stoi(x.operand);
 			symbol_table[label].address = z;
 		} catch (invalid_argument& e) {
+			if (isRelocatable(operand)) {
+				symbol_table[label].address = address;
+				return true;
+			} else if (isAbslute(operand)) {
+				symbol_table[label].address = address;
+				symbol_table[label].type = 'A';
+				return true;
+			}
 			return false;
 		}
 	}
@@ -140,6 +316,9 @@ bool handleBase(listing_line x) {
 		try {
 			int z = stoi(x.operand);
 		} catch (invalid_argument& e) {
+			if (isRelocatable(operand)) {
+				return true;
+			}
 			return false;
 		}
 	}
