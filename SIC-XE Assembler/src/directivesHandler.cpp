@@ -294,6 +294,7 @@ bool handleEqu(listing_line x) {
 		try {
 			int z = stoi(x.operand);
 			symbol_table[label].address = z;
+			symbol_table[label].type = 'A';
 		} catch (invalid_argument& e) {
 
 			return false;
@@ -305,21 +306,9 @@ bool handleEqu(listing_line x) {
 
 bool handleBase(listing_line x) {
 	string operand = getUpperVersion(x.operand);
-	if (!x.label.empty()) {
+	if (!x.label.empty()||x.operand.empty()) {
 		return false;
-	} else if (symbol_table.find(operand) != symbol_table.end()) {
 
-	} else if (iequals("*", operand)) {
-
-	} else {
-		try {
-			if (isRelocatable(operand)) {
-				return true;
-			}
-			stoi(x.operand);
-		} catch (invalid_argument& e) {
-			return false;
-		}
 	}
 	return true;
 }
