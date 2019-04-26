@@ -25,7 +25,7 @@ struct listing_line {
 };
 
 struct symbol_struct{
-	unsigned int address;
+	int address;
 	char type;
 	symbol_struct() : address(0), type('R') {}
 
