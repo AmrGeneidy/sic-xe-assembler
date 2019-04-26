@@ -36,6 +36,38 @@ void loadOpTable(string path) {
 	}
 	infile.close();
 }
+void write_symbol_table(){
+	ofstream file;
+	file.open("SymbolTable.txt");
+	file << "Symbol   Value   Relative(R)/Absolute(A)\n\n";
+	map<string, symbol_struct>::iterator itr;
+	for (itr = symbol_table.begin(); itr != symbol_table.end(); itr++) {
+		    string k =  itr->first;
+		    file << k;
+		    unsigned int spaces = 9-k.size();
+		    while(spaces > 0){
+		    	file << " ";
+		    	spaces--;
+		    }
+			std::stringstream ss;
+			ss << std::hex << itr->second.address; // int decimal_value
+			std::string res(ss.str());
+
+			int temp = 6 - res.length();
+			while (temp > 0) {
+				res = "0" + res;
+				temp--;
+			}
+			file << res;
+			unsigned int spaces1 = 19-res.size();
+			while(spaces1 > 0){
+				file << " ";
+				spaces1--;
+			}
+			file << itr->second.type;
+			file << "\n";
+		}
+}
 
 void write_listing_file() {
 	ofstream file;
@@ -203,5 +235,6 @@ int main() {
 		pass1_Algorithm(m[1].str());
 	}
 	write_listing_file();
+	write_symbol_table();
 	return 0;
 }
