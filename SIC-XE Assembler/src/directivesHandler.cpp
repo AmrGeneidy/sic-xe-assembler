@@ -320,7 +320,7 @@ bool handleBase(listing_line x) {
 			if (isRelocatable(operand)) {
 				return true;
 			}
-			int z = stoi(x.operand);
+			stoi(x.operand);
 		} catch (invalid_argument& e) {
 			return false;
 		}
