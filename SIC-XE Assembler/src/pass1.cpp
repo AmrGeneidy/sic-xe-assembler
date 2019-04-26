@@ -5,6 +5,7 @@
 #include<regex>
 #include<vector>
 #include<iterator>
+#include <sstream>
 
 #include"assemblerdata.h"
 #include"utility.h"
