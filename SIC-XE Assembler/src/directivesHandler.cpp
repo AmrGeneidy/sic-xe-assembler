@@ -47,7 +47,7 @@ bool isAbslute(string symbol) {
 }
 bool isRelocatable(string exp) {
 	smatch m;
-	regex r("(\\w+)([\\+\\-\\*\\/])(\\w+)");
+	regex r("(\\w+)(\\+|\\-|\\*|\\/)(\\w+)");
 	if (regex_match(exp, m, r)) {
 		string operand1 = getUpperVersion(m[1]);
 		string operat = getUpperVersion(m[2]);
@@ -76,7 +76,7 @@ bool isRelocatable(string exp) {
 }
 bool isAbsluteExp(string exp) {
 	smatch m;
-	regex r("(\\w+)([\\+\\-\\*\\/])(\\w+)");
+	regex r("(\\w+)(\\+|\\-|\\*|\\/)(\\w+)");
 	if (regex_match(exp, m, r)) {
 		string operand1 = getUpperVersion(m[1]);
 		string operat = getUpperVersion(m[2]);
@@ -226,7 +226,6 @@ bool handleByte(listing_line x) {
 	return false;
 }
 bool handleWord(listing_line x) {
-	//TODO handle operand 1,2,3
 	if (isArray(x.operand)) {
 		LOCCTR += 3 * arrayLength;
 	} else
