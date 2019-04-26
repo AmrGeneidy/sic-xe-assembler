@@ -4,6 +4,7 @@
  *  Created on: Apr 23, 2019
  *      Author: OWNER
  */
+#include <sstream>
 #include"assemblerdata.h"
 #include"utility.h"
 
