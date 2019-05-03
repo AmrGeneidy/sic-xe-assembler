@@ -3,8 +3,10 @@
 #include<string>
 #include<regex>
 #include<fstream>
+#include<algorithm>
+#include<cmath>
 
-
+std::string intToBinaryString(unsigned int &num);
 int binaryStringToInt(const std::string& binaryString);
 string hextobin(const string &s);
 string bintohex(const string &s);

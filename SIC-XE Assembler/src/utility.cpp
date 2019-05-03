@@ -1,9 +1,17 @@
-#include<cmath>
-
 #include"utility.h"
 
 using namespace std;
 //helping functions
+
+std::string intToBinaryString(unsigned int &num) {
+	unsigned int x = num;
+	std::string s;
+	do {
+		s.push_back('0' + (x & 1));
+	} while (x >>= 1);
+	std::reverse(s.begin(), s.end());
+	return s;
+}
 
 int binaryStringToInt(const string &binaryString) {
 	int value = 0;
@@ -17,38 +25,38 @@ int binaryStringToInt(const string &binaryString) {
 	return value;
 }
 
-string hextobin(const string &s){
-    string out;
-    for(auto i: s){
-        uint8_t n;
-        if(i <= '9' and i >= '0')
-            n = i - '0';
-        else
-            n = 10 + i - 'A';
-        for(int8_t j = 3; j >= 0; --j)
-            out.push_back((n & (1<<j))? '1':'0');
-    }
+string hextobin(const string &s) {
+	string out;
+	for (auto i : s) {
+		uint8_t n;
+		if (i <= '9' and i >= '0')
+			n = i - '0';
+		else
+			n = 10 + i - 'A';
+		for (int8_t j = 3; j >= 0; --j)
+			out.push_back((n & (1 << j)) ? '1' : '0');
+	}
 
-    return out;
+	return out;
 }
 
-string bintohex(const string &s){
-    string out;
-    for(unsigned int i = 0; i < s.size(); i += 4){
-        int8_t n = 0;
-        for(unsigned int j = i; j < i + 4; ++j){
-            n <<= 1;
-            if(s[j] == '1')
-                n |= 1;
-        }
+string bintohex(const string &s) {
+	string out;
+	for (unsigned int i = 0; i < s.size(); i += 4) {
+		int8_t n = 0;
+		for (unsigned int j = i; j < i + 4; ++j) {
+			n <<= 1;
+			if (s[j] == '1')
+				n |= 1;
+		}
 
-        if(n<=9)
-            out.push_back('0' + n);
-        else
-            out.push_back('A' + n - 10);
-    }
+		if (n <= 9)
+			out.push_back('0' + n);
+		else
+			out.push_back('A' + n - 10);
+	}
 
-    return out;
+	return out;
 }
 
 bool exists_test0(const std::string& name) {
