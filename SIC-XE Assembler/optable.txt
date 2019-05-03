@@ -24,8 +24,6 @@ OR             3        44    A <-- (A) | (m..m+2)
 RD             3        D8    A [rightmost byte] <-- data from device specified by (m)
 RMO            2        AC    r2 <-- (r1)                           X
 RSUB           3        4C    PC <-- (L)
-SHIFTL         2        A4    r1 <-- (r1); left circular shift n bits. {In assembled instruction, r2=n-1}
-SHIFTR         2        A8    r1 <-- (r1); right shift n bits with vacated bit positions set equal to leftmost bit of (r1). {In assembled instruction, r2=n-1}
 STA            3        0C    m..m+2 <-- (A)
 STB            3        78    m..m+2 <-- (B)                        X
 STCH           3        54    m <-- (A) [rightmost byte]
@@ -36,7 +34,6 @@ STT            3        84    m..m+2 <-- (T)                        X
 STX            3        10    m..m+2 <-- (X)
 SUB            3        1C    A <-- (A) - (m..m+2)
 SUBR           2        94    r2 <-- (r2) - (r1)                    X
-SVC            2        B0    Generate SVC interrupt. {In assembled instruction, r1=n}
 TD             3        E0    Test device specified by (m)        P     C
 TIX            3        2C    X <-- (X) + 1; (X) : (m..m+2)             C
 TIXR           2        B8    X <-- (X) + 1; (X) : (r1)             X   C

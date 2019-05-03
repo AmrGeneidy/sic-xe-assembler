@@ -2,7 +2,6 @@
 #include<map>
 #include<string>
 #include<fstream>
-#include<regex>
 #include<vector>
 #include<iterator>
 #include <sstream>

@@ -3,6 +3,13 @@
 using namespace std;
 //helping functions
 
+bool is_number(const std::string& num) {
+	string s = num[0] == '-' ? num.substr(1, num.length() - 1) : num;
+	return !s.empty()
+			&& std::find_if(s.begin(), s.end(),
+					[](char c) {return !std::isdigit(c);}) == s.end();
+}
+
 std::string intToBinaryString(unsigned int &num) {
 	unsigned int x = num;
 	std::string s;
