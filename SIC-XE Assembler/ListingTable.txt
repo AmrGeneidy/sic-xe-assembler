@@ -1,2 +1,12 @@
 Line no. Address Label    Mnemonic  Operand          Comments
 
+1        000000                                      .Label.  Opcode  The  O p e r a n d 
+2        000000                                      .   
+3        000000           START     0000             
+4        000000  STAB     RESB      1100             
+5        00044c           ORG       STAB             
+6        000000  SYMBOL   RESB      6                
+7        000006  VALUE    RESW      1                
+8        000009  FLAGS    RESB      2                
+9        00000b           ORG       STAB+1100        
+10       00044c           END                        
