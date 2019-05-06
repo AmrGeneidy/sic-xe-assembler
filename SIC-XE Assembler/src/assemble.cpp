@@ -5,7 +5,7 @@
 
 using namespace std;
 
-vector<int> tRecords;
+vector<string> tRecords;
 map<string, string> registers;
 
 
@@ -22,7 +22,7 @@ void loadRegisters(){
 }
 
 bool handleFormat2(string mnemonic, string operand){
-	string objectCode = intToBinaryString(opTable[mnemonic].opcode);
+	string objectCode = hextobin(opTable[mnemonic].opcode);
 	smatch m;
 	regex r("^(\\w+)(\\,(\\w+))?$");
 	regex_search(operand, m, r);
@@ -43,7 +43,7 @@ bool handleFormat2(string mnemonic, string operand){
 	}else {
 		return false;
 	}
-	tRecords.push_back(binaryStringToInt(objectCode));
+	tRecords.push_back(bintohex(objectCode));
 	return true;
 }
 
@@ -71,6 +71,9 @@ bool instructionToObjectCode(listing_line x) {
 //ni = "11" if simple addressing
 
 //	operand regex: "^(\\*)|([#@]?\\w+)|(\\w+\\,[Xx])$"
+//  operand regex2: "^([#@])?((\\*)|(\\w+))(\\+|\\-|\\/|\\*)((\\*)|(\\w+))$"
+//  operand regex2: "^((\\*)|(\\w+))(\\+|\\-|\\/|\\*)((\\*)|(\\w+))\\,[Xx]$"
+
 //if \\w+ is integer -> direct addressing -> bpe = "000" & mRecord
 //else if (in symbol_table) then calculate address
 //else error

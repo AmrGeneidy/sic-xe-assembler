@@ -1,6 +1,8 @@
 Symbol   Value   Relative(R)/Absolute(A)
 
-FLAGS    000009             R
-STAB     000000             R
-SYMBOL   000000             R
-VALUE    000006             R
+AAA      00000c             R
+ALPHA    000010             R
+BGN      000000             R
+C1       000013             R
+TA       000014             R
+XXX      000004             A
