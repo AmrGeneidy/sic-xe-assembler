@@ -1,28 +1,17 @@
-.234567890123456789
-LAB2C    START   1000
-         LDA     ALPHA
-         LDB     #10
-         LDX     #0
-         ADDR    A,B
-         STA     SAVEW,X
-         LDX     #1
-         STA     SAVEW,X
-.Format 4
-         +SUB    #12
-         LDX     #0
-         LDCH    HEXCHAR
-         STA     INPUT
-LOOP     LDCH    STRING,X
-         COMP    INPUT
-         JEQ     FOUND
-         STCH    OUTPUT,X
-         TIX     #5
-         JLT     LOOP
-FOUND    J       OUT
-ALPHA    WORD    1,2
-SAVEW    RESW    2
-HEXCHAR  BYTE    X'61'
-INPUT    RESB    1
-STRING   BYTE    C'String'
-OUTPUT   RESB    5
-OUT      END
+.23456789012345678901234567890123456
+.Label.  Opcode  The  O p e r a n d 
+.   
+         START   0000
+    BGN      LDF     #5 
+         STA     ALPHA
+         +LDCH    #90
+  aaa    equ     bgn+12     
+      STCH    C1
+aaa     lda  #5
+         J       *
+.
+ALPHA    RESW    1
+xxx      equ     alpha-aaa 
+C1       RESB    1
+ta       byte c'fjdfq'
+ dds        END     BGN 

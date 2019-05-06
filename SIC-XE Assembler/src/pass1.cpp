@@ -32,7 +32,7 @@ void loadOpTable(string path) {
 			smatch m;
 			regex_search(line, m, r);
 			opTable[m[1].str()].format = stoi(m[2].str());
-			opTable[m[1].str()].opcode = stoi(m[3].str(), 0, 16);
+			opTable[m[1].str()].opcode = m[3].str();
 		}
 		infile.close();
 	}

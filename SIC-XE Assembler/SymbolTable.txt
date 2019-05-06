@@ -1,10 +1,8 @@
 Symbol   Value   Relative(R)/Absolute(A)
 
-ALPHA    00103a             R
-FOUND    001037             R
-HEXCHAR  001043             R
-INPUT    001044             R
-LOOP     001025             R
-OUTPUT   00104b             R
-SAVEW    00103d             R
-STRING   001045             R
+AAA      00000c             R
+ALPHA    000010             R
+BGN      000000             R
+C1       000013             R
+TA       000014             R
+XXX      000004             A

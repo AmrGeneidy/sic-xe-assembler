@@ -1,2 +1,21 @@
 Line no. Address Label    Mnemonic  Operand          Comments
 
+1        000000                                      .23456789012345678901234567890123456
+2        000000                                      .Label.  Opcode  The  O p e r a n d 
+3        000000                                      .   
+4        000000           START     0000             
+5        000000  BGN      LDF       #5               
+      ****Error: Invalid operation code
+6        000000           STA       ALPHA            
+7        000003           +LDCH     #90              
+8        000007  aaa      equ       bgn+12           
+9        000007           STCH      C1               
+10       00000a  aaa      lda       #5               
+      ****Error: symbol 'aaa' is already defined
+11       00000d           J         *                
+12       000010                                      .
+13       000010  ALPHA    RESW      1                
+14       000013  xxx      equ       alpha-aaa        
+15       000013  C1       RESB      1                
+16       000014  ta       byte      c'fjdfq'         
+17       000019  dds      END       BGN              
