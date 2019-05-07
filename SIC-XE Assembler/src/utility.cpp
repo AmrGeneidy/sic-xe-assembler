@@ -10,13 +10,36 @@ bool is_number(const std::string& num) {
 					[](char c) {return !std::isdigit(c);}) == s.end();
 }
 
-std::string intToBinaryString(unsigned int &num) {
-	unsigned int x = num;
+//numOfHexDigits must be big enough to carry the whole int
+std::string intToBinaryString(int &num, int &numOfHexDigits) {
+	unsigned int x;
+	if (num < 0) {
+		x = -1 * num;
+	} else {
+		x = num;
+	}
 	std::string s;
 	do {
 		s.push_back('0' + (x & 1));
 	} while (x >>= 1);
 	std::reverse(s.begin(), s.end());
+	int diff = numOfHexDigits * 4 - s.size();
+	string temp = "";
+	for(int  i = 0; i < diff; ++i) {
+		temp.push_back('0');
+	}
+	s = temp.append(s);
+	if (num < 0) {
+		bool firstOnePassed = false;
+		for (int j = s.size() - 1; j >= 0 ; --j) {
+			 if(s[j] == '1'){
+				 firstOnePassed = true;
+			 }
+			 if(firstOnePassed){
+				 s[j] = (s[j] == '1') ? '0': '1';
+			 }
+		}
+	}
 	return s;
 }
 
