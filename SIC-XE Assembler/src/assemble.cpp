@@ -91,16 +91,20 @@ bool instructionToObjectCode(listing_line x) {
 		operand = operand.substr(1, operand.size() - 1);
 		if (is_number(operand)) {
 			//special case operand is #int ex: #3
-
-			if (stoi(operand) < 0 || stoi(operand) > 4095) {
-				return false;
-			}
 			if (format == 4) {
+				if (stoi(operand) < 0 || stoi(operand) > 1048575) {
+					//1048575 dec = fffff hex
+					return false;
+				}
 				//bpe = 001
 				objectCode.append("001");
 				objectCode = bintohex(objectCode);
 				objectCode.append(intToBinaryString(stoi(operand), 5));
 			}else{
+				if (stoi(operand) < 0 || stoi(operand) > 4095) {
+					//4095 dec = fff hex
+					return false;
+				}
 				//bpe = 000
 				objectCode.append("000");
 				objectCode = bintohex(objectCode);
