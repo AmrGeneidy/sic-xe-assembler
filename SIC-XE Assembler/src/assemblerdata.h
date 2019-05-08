@@ -43,9 +43,12 @@ extern unsigned int program_length;
 extern unsigned int LOCCTR;
 //if base is negative then NOBASE
 extern int base;
+extern int address;
 
 void build_listing_table(string path);
 bool handleDirective(listing_line x);
 bool isDirective(string x);
+bool isRelocatable(string exp);
+bool isAbsluteExp(string exp);
 
 #endif /* ASSEMBLERDATA_H_ */
