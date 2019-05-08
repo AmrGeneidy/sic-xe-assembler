@@ -128,6 +128,10 @@ bool instructionToObjectCode(listing_line x) {
 	if (format == 4) {
 		//TODO modification record
 		objectCode.append("001");
+		if(TA > 1048575){
+			//1048575 dec = fffff hex
+			return false;
+		}
 		objectCode.append(bintohex(intToBinaryString(TA, 5)));
 	}else{
 		int disp = TA - (LOCCTR + format);
