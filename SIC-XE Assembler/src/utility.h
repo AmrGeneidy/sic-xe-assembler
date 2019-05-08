@@ -7,7 +7,7 @@
 #include<cmath>
 
 bool is_number(const std::string& num);
-std::string intToBinaryString(int &num, int &numOfHexDigits);
+std::string intToBinaryString(const int num, const int numOfHexDigits);
 int binaryStringToInt(const std::string& binaryString);
 std::string hextobin(const std::string &s);
 std::string bintohex(const std::string &s);

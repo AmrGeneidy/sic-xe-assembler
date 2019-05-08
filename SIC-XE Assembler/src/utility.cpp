@@ -11,7 +11,7 @@ bool is_number(const std::string& num) {
 }
 
 //numOfHexDigits must be big enough to carry the whole int
-std::string intToBinaryString(int &num, int &numOfHexDigits) {
+std::string intToBinaryString(const int num, const int numOfHexDigits) {
 	unsigned int x;
 	if (num < 0) {
 		x = -1 * num;
@@ -32,11 +32,11 @@ std::string intToBinaryString(int &num, int &numOfHexDigits) {
 	if (num < 0) {
 		bool firstOnePassed = false;
 		for (int j = s.size() - 1; j >= 0 ; --j) {
-			 if(s[j] == '1'){
-				 firstOnePassed = true;
-			 }
 			 if(firstOnePassed){
 				 s[j] = (s[j] == '1') ? '0': '1';
+			 }
+			 if(s[j] == '1'){
+				 firstOnePassed = true;
 			 }
 		}
 	}

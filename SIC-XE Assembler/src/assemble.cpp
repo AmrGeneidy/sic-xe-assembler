@@ -9,8 +9,7 @@ int base = -1;
 vector<string> tRecords;
 map<string, string> registers;
 
-
-void loadRegisters(){
+void loadRegisters() {
 	registers["A"] = "0000";
 	registers["X"] = "0001";
 	registers["L"] = "0010";
@@ -22,7 +21,7 @@ void loadRegisters(){
 	registers["SW"] = "1001";
 }
 
-bool handleFormat2(string mnemonic, string operand){
+bool handleFormat2(string mnemonic, string operand) {
 	string objectCode = hextobin(opTable[mnemonic].opcode);
 	smatch m;
 	regex r("^(\\w+)(\\,(\\w+))?$");
@@ -33,60 +32,30 @@ bool handleFormat2(string mnemonic, string operand){
 		if (m[3].str().empty()) {
 			//no register 2
 			objectCode.append("0000");
-		}else{
-			if(registers.find(m[3].str()) != registers.end()){
+		} else {
+			if (registers.find(m[3].str()) != registers.end()) {
 				//register 2 exist
 				objectCode.append(registers[m[3].str()]);
-			}else{
+			} else {
 				return false;
 			}
 		}
-	}else {
+	} else {
 		return false;
 	}
 	tRecords.push_back(bintohex(objectCode));
 	return true;
 }
 
-bool handleOneOperand(string mnemonic, string operand){
-	string nixbpe;
-	string objectCode = hextobin(opTable[mnemonic].opcode).substr(0, 6);
-	smatch m;
-	regex r("^([#@]?(([-+]?\\w+)|(\\*)))|(((\\*)|([-+]?\\w+))\\,[Xx])$");
-	regex_search(operand, m, r);
-	if (m.size() > 0){
-		//not indexing
-		if(!m[1].str().empty()){
-			switch (operand[0]){
-				case '#':
-					nixbpe = "010";
-					operand = operand.substr(1, operand.size() - 1);
-					break;
-				case '@':
-					nixbpe = "100";
-					operand = operand.substr(1, operand.size() - 1);
-					break;
-				default :
-					nixbpe = "110";
-			}
-			// is int matches ^[-+]?\\d+$
-
-			//handle bpe & address
-		}else if (!m[5].str().empty()){
-			nixbpe = "111";
-			operand = operand.substr(0, operand.size() - 2);
-			//handle bpe & address
-		}else {
-			return false;
-		}
-		return true;
-	}else{
-		return false;
+int operandToTargetAddress(string operand) {
+	smatch m1;
+	regex r1("^(\\*|([-+]?\\d+)|(\\w+))$");
+	regex_search(operand, m1, r1);
+	if (m1.size() > 0) {
+		//normal operand
 	}
-}
+	return 0;
 
-bool handleExpressionOperand(string mnemonic, string operand){
-	string objectCode = hextobin(opTable[mnemonic].opcode).substr(0, 6);
 }
 
 //return false if there is an error in operand
@@ -103,32 +72,79 @@ bool instructionToObjectCode(listing_line x) {
 	if (mnemonic == "RSUB") {
 		objectCode = bintohex(objectCode.append("110000"));
 		objectCode.append("000");
-		if(format == 4){
+		if (format == 4) {
 			objectCode.append("00");
 		}
 		return true;
 	}
 	objectCode = hextobin(opTable[mnemonic].opcode).substr(0, 6);
-	string last2chars = operand[operand.size()-1] + operand[operand.size()-2];
-	if(iequals(last2chars, ",X")){
+	string last2chars = "";
+	last2chars.push_back(operand[operand.size() - 2]);
+	last2chars.push_back(operand[operand.size() - 1]);
+	if (iequals(last2chars, ",X")) {
 		//indexing nix = 111
 		objectCode.append("111");
-		operand = operand.substr(0, operand.size()-2);
-	}else if(operand[0] == '#' || operand[0] == '@'){
-		//immediate or indirect addressing
-		if(operand[0] == '#'){
-			//immediate nix = 010
-			objectCode.append("010");
-		}else{
-			//indirect nix = 100
-			objectCode.append("100");
+		operand = operand.substr(0, operand.size() - 2);
+	} else if (operand[0] == '#') {
+		//immediate nix = 010
+		objectCode.append("010");
+		operand = operand.substr(1, operand.size() - 1);
+		if (is_number(operand)) {
+			//special case operand is #int ex: #3
+
+			if (stoi(operand) < 0 || stoi(operand) > 4095) {
+				return false;
+			}
+			if (format == 4) {
+				//bpe = 001
+				objectCode.append("001");
+				objectCode = bintohex(objectCode);
+				objectCode.append(intToBinaryString(stoi(operand), 5));
+			}else{
+				//bpe = 000
+				objectCode.append("000");
+				objectCode = bintohex(objectCode);
+				objectCode.append(intToBinaryString(stoi(operand), 3));
+			}
+			tRecords.push_back(objectCode);
+			return true;
 		}
-		operand = operand.substr(1, operand.size()-1);
-	}else{
+		//TODO evaluate expression
+		//if(/*expression*/)
+	} else if (operand[0] == '@') {
+		//indirect nix = 100
+		objectCode.append("100");
+		operand = operand.substr(1, operand.size() - 1);
+	} else {
 		//simple addressing with no indexing nix = 110
 		objectCode.append("110");
 	}
+	int TA = operandToTargetAddress(operand);
 
+	if (format == 4) {
+		//TODO modification record
+		objectCode.append("001");
+		objectCode.append(bintohex(intToBinaryString(TA, 5)));
+	}else{
+		int disp = TA - (LOCCTR + format);
+		if (-2048 <= disp && disp <= 2047){
+			//PC-relative bpe = 010
+			objectCode.append("010");
+		}else if(base >= 0){
+			//base available
+			disp = TA - base;
+			if (0 <= disp && disp <= 4095){
+				//base relative bpe = 100
+				objectCode.append("100");
+			}else{
+				return false;
+			}
+		}
+		objectCode.append(bintohex(intToBinaryString(disp, 3)));
+	}
+	tRecords.push_back(objectCode);
+	return true;
+}
 	//first clear nix (Don't use regex in first stage)
 	//test indexing
 	//"\\,[Xx]$" nix = 111
@@ -149,14 +165,6 @@ bool instructionToObjectCode(listing_line x) {
 	//if operand matches "^([-+]?\\d+)$" then is int external method
 	//else operand is label
 
-
-	//this methods will have a lot of arguments, solution -> make a struct
-	if (handleOneOperand(mnemonic, operand) || handleExpressionOperand(mnemonic, operand)) {
-		return true;
-	}else{
-		return false;
-	}
-}
 // if mnemonic == RSUB -> nixbpe = "110000" & disp = "000" f3 or "00000" f4
 
 //direct means not relative
