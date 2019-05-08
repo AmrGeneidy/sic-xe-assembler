@@ -6,9 +6,8 @@
 using namespace std;
 
 int base = -1;
-vector<string> tRecords;
 map<string, string> registers;
-
+string objectCode;
 void loadRegisters() {
 	registers["A"] = "0000";
 	registers["X"] = "0001";
@@ -22,7 +21,7 @@ void loadRegisters() {
 }
 
 bool handleFormat2(string mnemonic, string operand) {
-	string objectCode = hextobin(opTable[mnemonic].opcode);
+	objectCode = hextobin(opTable[mnemonic].opcode);
 	smatch m;
 	regex r("^(\\w+)(\\,(\\w+))?$");
 	regex_search(operand, m, r);
@@ -43,7 +42,7 @@ bool handleFormat2(string mnemonic, string operand) {
 	} else {
 		return false;
 	}
-	tRecords.push_back(bintohex(objectCode));
+	objectCode = bintohex(objectCode);
 	return true;
 }
 
@@ -73,7 +72,6 @@ bool isOperandToTargetAddress(string operand) {
 //return false if there is an error in operand
 bool instructionToObjectCode(unsigned int line_number) {
 	loadRegisters();
-	string objectCode;
 	string operand = getUpperVersion(listing_table[line_number].operand);
 	string mnemonic = getUpperVersion(listing_table[line_number].mnemonic);
 	unsigned int format = listing_table[line_number].isFormat4 == true ? 4 : opTable[mnemonic].format;
@@ -130,7 +128,6 @@ bool instructionToObjectCode(unsigned int line_number) {
 				objectCode = bintohex(objectCode);
 				objectCode.append(intToBinaryString(stoi(operand), 3));
 			}
-			tRecords.push_back(objectCode);
 			return true;
 		}
 		//TODO evaluate expression
@@ -153,10 +150,6 @@ bool instructionToObjectCode(unsigned int line_number) {
 	if (format == 4) {
 		//TODO modification record
 		objectCode.append("001");
-		if(TA > 1048575){
-			//1048575 dec = fffff hex
-			return false;
-		}
 		objectCode.append(bintohex(intToBinaryString(TA, 5)));
 	}else{
 		int disp = TA - (LOCCTR + format);
@@ -176,8 +169,16 @@ bool instructionToObjectCode(unsigned int line_number) {
 		}
 		objectCode.append(bintohex(intToBinaryString(disp, 3)));
 	}
-	tRecords.push_back(objectCode);
-	return true;
+	if(objectCode.length() != 6 && format == 3){
+		listing_table[line_number].error.push_back("Error in operand in format 3 !!");
+		return false;
+	}else if (objectCode.length() != 8 && format == 4){
+		listing_table[line_number].error.push_back("Error in operand in format 4 !!");
+		return false;
+	}else {
+		return true;
+	}
+
 }
 	//first clear nix (Don't use regex in first stage)
 	//test indexing

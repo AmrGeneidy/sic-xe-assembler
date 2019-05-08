@@ -36,7 +36,6 @@ extern map<string, struct_opcode> opTable;
 extern map<unsigned int, listing_line> listing_table;
 //key: label name ,  value: address
 extern map<string, symbol_struct> symbol_table;
-extern vector<string> tRecords;
 
 extern unsigned int starting_address;
 extern unsigned int program_length;
