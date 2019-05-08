@@ -46,7 +46,7 @@ bool isAbslute(string symbol) {
 }
 bool isRelocatable(string exp) {
 	smatch m;
-	regex r("(\\w+)(\\+|\\-|\\*|\\/)(\\w+)");
+	regex r("(\\w+)(\\+|\\-)(\\w+)");
 	if (regex_match(exp, m, r)) {
 		string operand1 = getUpperVersion(m[1]);
 		string operat = getUpperVersion(m[2]);
@@ -67,6 +67,46 @@ bool isRelocatable(string exp) {
 		} else if (iequals("-", operat)) {
 			if (isRelative(operand1) && isInt(operand2)) {
 				address = symbol_table[operand1].address - stoi(operand2);
+				return address >= 0;
+			}else if(isRelative(operand1) && isAbslute(operand2)){
+				address = symbol_table[operand1].address
+										- symbol_table[operand2].address;
+				return address >= 0;
+			}
+		}
+	}
+	regex r2("(\\*)(\\+|\\-)(\\w+)");
+	if (regex_match(exp, m, r)) {
+		string operat = getUpperVersion(m[2]);
+		string operand2 = getUpperVersion(m[3]);
+		if (iequals("+", operat)) {
+			if (isAbslute(operand2)) {
+				address = symbol_table[operand2].address + LOCCTR;
+				return address >= 0;
+			} else if (isInt(operand2)) {
+				address = LOCCTR + stoi(operand2);
+				return address >= 0;
+			}
+		} else if (iequals("-", operat)) {
+			if (isInt(operand2)) {
+				address = LOCCTR - stoi(operand2);
+				return address >= 0;
+			} else if (isAbslute(operand2)) {
+				address = -symbol_table[operand2].address + LOCCTR;
+				return address >= 0;
+			}
+		}
+	}
+	regex r2("(\\w+)(\\+|\\-)(\\*)");
+	if (regex_match(exp, m, r)) {
+		string operat = getUpperVersion(m[2]);
+		string operand1 = getUpperVersion(m[1]);
+		if (iequals("+", operat)) {
+			if (isAbslute(operand1)) {
+				address = symbol_table[operand1].address + LOCCTR;
+				return address >= 0;
+			} else if (isInt(operand1)) {
+				address = LOCCTR + stoi(operand1);
 				return address >= 0;
 			}
 		}
@@ -157,6 +197,24 @@ bool isAbsluteExp(string exp) {
 			return false;
 		}
 	} else {
+		regex r2("(*)(\\-)(\\w+)");
+		if (regex_match(exp, m, r2)) {
+			string operat = getUpperVersion(m[2]);
+			string operand2 = getUpperVersion(m[3]);
+			if (isRelative(operand2)) {
+				address = -symbol_table[operand2].address + LOCCTR;
+				return address >= 0;
+			}
+		}
+		regex r3("(\\w+)(\\-)(\\*)");
+				if (regex_match(exp, m, r3)) {
+					string operat = getUpperVersion(m[2]);
+					string operand2 = getUpperVersion(m[1]);
+					if (isRelative(operand2)) {
+						address = symbol_table[operand2].address - LOCCTR;
+						return address >= 0;
+					}
+				}
 		return false;
 	}
 }
@@ -311,62 +369,62 @@ bool handleBase(listing_line x) {
 	}
 	return true;
 }
-void writeWord(int operand) {
-
-}
 
 void wordObCode(unsigned int lineNumber) {
 	string operand = listing_table[lineNumber].operand;
+	string ans = "";
 	if (isArray(operand)) {
 		stringstream ss(operand);
 		while (ss.good()) {
 			string substr;
 			getline(ss, substr, ',');
-			writeWord(stoi(substr));
+			ans = ans + bintohex(intToBinaryString(stoi(substr), 6));
 		}
 	} else {
 		int x = stoi(operand);
-		writeWord(x);
+		ans = ans + bintohex(intToBinaryString(x, 6));
 	}
 }
-void byteObCode(unsigned int lineNumber) {
+string byteObCode(unsigned int lineNumber) {
 	string operand = listing_table[lineNumber].operand;
+	string ans = "";
 	if (operand[0] == 'x' || operand[0] == 'X') {
 		int i = 2;
-		while (i <= operand.size() - 3) {
-			writeWord(stoi(operand.substr(i, 2), 0, 16));
-			i += 2;
-		}
+		ans = operand.substr(2, operand.size() - 3);
+//		while (i <= operand.size() - 3) {
+//			ans = ans+ bintohex(intToBinaryString(stoi(operand.substr(i, 2), 0, 16),1));
+//			i += 2;
+//		}
 	} else {
 		int i = 2;
 		while (i <= operand.size() - 2) {
-			writeWord(operand[i]);
+			ans = ans + bintohex(intToBinaryString(operand[i], 1));
 			i++;
 		}
 	}
+	return ans;
 }
 
-bool handleBasePass2(unsigned int lineNumber){
+bool handleBasePass2(unsigned int lineNumber) {
 	string operand = listing_table[lineNumber].operand;
 	if (symbol_table.find(operand) != symbol_table.end()) {
-			base = symbol_table[operand].address;
-		} else if (iequals("*", operand)) {
-			//TODO locctr?
-			base = LOCCTR;
-		} else {
+		base = symbol_table[operand].address;
+	} else if (iequals("*", operand)) {
+		//TODO locctr?
+		base = LOCCTR;
+	} else {
 
-			if (isRelocatable(operand)) {
-				base = address;
-			} else if (isAbsluteExp(operand)) {
-				base = address;
-			}
-			try {
-				int z = stoi(operand);
-				base = z;
-			} catch (invalid_argument& e) {
-
-				return false;
-			}
+		if (isRelocatable(operand)) {
+			base = address;
+		} else if (isAbsluteExp(operand)) {
+			base = address;
 		}
+		try {
+			int z = stoi(operand);
+			base = z;
+		} catch (invalid_argument& e) {
+			return false;
+		}
+	}
 	return true;
 }
