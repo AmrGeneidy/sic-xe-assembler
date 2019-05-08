@@ -15,16 +15,15 @@ bool isArray(string exp) {
 	smatch m;
 	regex r("-?\\d+(\\,-?\\d+)+");
 	if (regex_match(exp, m, r)) {
-		 stringstream ss( exp );
-		    vector<string> result;
+		stringstream ss(exp);
+		vector<string> result;
 
-		    while( ss.good() )
-		    {
-		        string substr;
-		        getline( ss, substr, ',' );
-		        result.push_back( substr );
-		    }
-		    arrayLength = result.size();
+		while (ss.good()) {
+			string substr;
+			getline(ss, substr, ',');
+			result.push_back(substr);
+		}
+		arrayLength = result.size();
 		return true;
 	}
 	return false;
@@ -306,9 +305,68 @@ bool handleEqu(listing_line x) {
 
 bool handleBase(listing_line x) {
 	string operand = getUpperVersion(x.operand);
-	if (!x.label.empty()||x.operand.empty()) {
+	if (!x.label.empty() || x.operand.empty()) {
 		return false;
 
 	}
+	return true;
+}
+void writeWord(int operand) {
+
+}
+
+void wordObCode(unsigned int lineNumber) {
+	string operand = listing_table[lineNumber].operand;
+	if (isArray(operand)) {
+		stringstream ss(operand);
+		while (ss.good()) {
+			string substr;
+			getline(ss, substr, ',');
+			writeWord(stoi(substr));
+		}
+	} else {
+		int x = stoi(operand);
+		writeWord(x);
+	}
+}
+void byteObCode(unsigned int lineNumber) {
+	string operand = listing_table[lineNumber].operand;
+	if (operand[0] == 'x' || operand[0] == 'X') {
+		int i = 2;
+		while (i <= operand.size() - 3) {
+			writeWord(stoi(operand.substr(i, 2), 0, 16));
+			i += 2;
+		}
+	} else {
+		int i = 2;
+		while (i <= operand.size() - 2) {
+			writeWord(operand[i]);
+			i++;
+		}
+	}
+}
+
+bool handleBasePass2(unsigned int lineNumber){
+	string operand = listing_table[lineNumber].operand;
+	if (symbol_table.find(operand) != symbol_table.end()) {
+			base = symbol_table[operand].address;
+		} else if (iequals("*", operand)) {
+			//TODO locctr?
+			base = LOCCTR;
+		} else {
+
+			if (isRelocatable(operand)) {
+				base = address;
+			} else if (isAbsluteExp(operand)) {
+				base = address;
+			}
+			try {
+				int z = stoi(operand);
+				base = z;
+			} catch (invalid_argument& e) {
+
+				return false;
+			}
+		}
 	return true;
 }
