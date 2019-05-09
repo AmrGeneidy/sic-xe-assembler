@@ -43,6 +43,9 @@ extern unsigned int LOCCTR;
 //if base is negative then NOBASE
 extern int base;
 extern int address;
+extern unsigned int current_line_number;
+extern listing_line current_line;
+
 
 void runPass1(string input);
 void write_listing_file(string fileName);

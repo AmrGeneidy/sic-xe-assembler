@@ -7,8 +7,6 @@ using namespace std;
 int base = -1;
 map<string, string> registers;
 string objectCode;
-unsigned int current_line_number;
-listing_line current_line;
 
 void loadRegisters() {
 	registers["A"] = "0000";
