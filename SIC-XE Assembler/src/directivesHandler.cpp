@@ -76,7 +76,7 @@ bool isRelocatable(string exp) {
 		}
 	}
 	regex r2("(\\*)(\\+|\\-)(\\w+)");
-	if (regex_match(exp, m, r)) {
+	if (regex_match(exp, m, r2)) {
 		string operat = getUpperVersion(m[2]);
 		string operand2 = getUpperVersion(m[3]);
 		if (iequals("+", operat)) {
@@ -97,8 +97,8 @@ bool isRelocatable(string exp) {
 			}
 		}
 	}
-	regex r2("(\\w+)(\\+|\\-)(\\*)");
-	if (regex_match(exp, m, r)) {
+	regex r3("(\\w+)(\\+|\\-)(\\*)");
+	if (regex_match(exp, m, r3)) {
 		string operat = getUpperVersion(m[2]);
 		string operand1 = getUpperVersion(m[1]);
 		if (iequals("+", operat)) {
