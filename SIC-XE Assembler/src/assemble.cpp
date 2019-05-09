@@ -6,9 +6,8 @@
 using namespace std;
 
 int base = -1;
-vector<string> tRecords;
 map<string, string> registers;
-
+string objectCode;
 void loadRegisters() {
 	registers["A"] = "0000";
 	registers["X"] = "0001";
@@ -22,7 +21,7 @@ void loadRegisters() {
 }
 
 bool handleFormat2(string mnemonic, string operand) {
-	string objectCode = hextobin(opTable[mnemonic].opcode);
+	objectCode = hextobin(opTable[mnemonic].opcode);
 	smatch m;
 	regex r("^(\\w+)(\\,(\\w+))?$");
 	regex_search(operand, m, r);
@@ -43,30 +42,47 @@ bool handleFormat2(string mnemonic, string operand) {
 	} else {
 		return false;
 	}
-	tRecords.push_back(bintohex(objectCode));
+	objectCode = bintohex(objectCode);
 	return true;
 }
 
-int operandToTargetAddress(string operand) {
-	smatch m1;
-	regex r1("^(\\*|([-+]?\\d+)|(\\w+))$");
-	regex_search(operand, m1, r1);
-	if (m1.size() > 0) {
-		//normal operand
-	}
-	return 0;
-
+bool isOperandToTargetAddress(string operand) {
+		if (operand.empty()) {
+			return false;
+		} else if (symbol_table.find(operand) != symbol_table.end()) {
+			address = symbol_table[operand].address;
+		} else if (iequals("*", operand)) {
+			address = LOCCTR;
+		} else {
+			if (isRelocatable(operand)) {
+				return true;
+			} else if (isAbsluteExp(operand)) {
+				return true;
+			}
+			try {
+				int z = stoi(operand);
+				address = z;
+			} catch (invalid_argument& e) {
+				return false;
+			}
+		}
+		return true;
 }
 
 //return false if there is an error in operand
-bool instructionToObjectCode(listing_line x) {
+bool instructionToObjectCode(unsigned int line_number) {
 	loadRegisters();
-	string objectCode;
-	string operand = getUpperVersion(x.operand);
-	string mnemonic = getUpperVersion(x.mnemonic);
-	unsigned int format = x.isFormat4 == true ? 4 : opTable[mnemonic].format;
+	string operand = getUpperVersion(listing_table[line_number].operand);
+	string mnemonic = getUpperVersion(listing_table[line_number].mnemonic);
+	unsigned int format = listing_table[line_number].isFormat4 == true ? 4 : opTable[mnemonic].format;
 	if (format == 2) {
-		return handleFormat2(mnemonic, operand);
+		if(handleFormat2(mnemonic, operand)){
+			return true;
+		}else {
+			listing_table[line_number].error.push_back("Couldn't process format 2 !!");
+			return false;
+		}
+
 	}
 	//handle special case RSUB has no operand
 	if (mnemonic == "RSUB") {
@@ -94,6 +110,7 @@ bool instructionToObjectCode(listing_line x) {
 			if (format == 4) {
 				if (stoi(operand) < 0 || stoi(operand) > 1048575) {
 					//1048575 dec = fffff hex
+					listing_table[line_number].error.push_back("Operand Can't be greater than 0XFFFFF or less than 0 in format 4 !!");
 					return false;
 				}
 				//bpe = 001
@@ -103,6 +120,7 @@ bool instructionToObjectCode(listing_line x) {
 			}else{
 				if (stoi(operand) < 0 || stoi(operand) > 4095) {
 					//4095 dec = fff hex
+					listing_table[line_number].error.push_back("Operand Can't be greater than 0XFFF or less than 0 in format 3 !!");
 					return false;
 				}
 				//bpe = 000
@@ -110,7 +128,6 @@ bool instructionToObjectCode(listing_line x) {
 				objectCode = bintohex(objectCode);
 				objectCode.append(intToBinaryString(stoi(operand), 3));
 			}
-			tRecords.push_back(objectCode);
 			return true;
 		}
 		//TODO evaluate expression
@@ -123,15 +140,16 @@ bool instructionToObjectCode(listing_line x) {
 		//simple addressing with no indexing nix = 110
 		objectCode.append("110");
 	}
-	int TA = operandToTargetAddress(operand);
-
+	int TA;
+	if(isOperandToTargetAddress(operand)){
+		TA = address;
+	}else{
+		listing_table[line_number].error.push_back("Invalid operand !!");
+		return false;
+	}
 	if (format == 4) {
 		//TODO modification record
 		objectCode.append("001");
-		if(TA > 1048575){
-			//1048575 dec = fffff hex
-			return false;
-		}
 		objectCode.append(bintohex(intToBinaryString(TA, 5)));
 	}else{
 		int disp = TA - (LOCCTR + format);
@@ -145,13 +163,22 @@ bool instructionToObjectCode(listing_line x) {
 				//base relative bpe = 100
 				objectCode.append("100");
 			}else{
+				listing_table[line_number].error.push_back("Can't Process the address!!");
 				return false;
 			}
 		}
 		objectCode.append(bintohex(intToBinaryString(disp, 3)));
 	}
-	tRecords.push_back(objectCode);
-	return true;
+	if(objectCode.length() != 6 && format == 3){
+		listing_table[line_number].error.push_back("Error in operand in format 3 !!");
+		return false;
+	}else if (objectCode.length() != 8 && format == 4){
+		listing_table[line_number].error.push_back("Error in operand in format 4 !!");
+		return false;
+	}else {
+		return true;
+	}
+
 }
 	//first clear nix (Don't use regex in first stage)
 	//test indexing
