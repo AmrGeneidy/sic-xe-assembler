@@ -70,9 +70,9 @@ void write_symbol_table(){
 		}
 }
 
-void write_listing_file() {
+void write_listing_file(string fileName) {
 	ofstream file;
-	file.open("ListingTable.txt");
+	file.open(fileName);
 	file << "Line no. Address Label    Mnemonic  Operand          Comments\n\n";
 	map<unsigned int, listing_line>::iterator itr;
 	int i = 0;
@@ -213,34 +213,44 @@ void pass1_Algorithm(string codePath) {
 			break;
 		}
 		current_line = listing_table[current_line_number];
+		if(iequals(current_line.mnemonic, "END") && !current_line.label.empty()){
+			current_line.error.push_back("Label field must be blank in END instruction !!");
+		}
 	}
 	listing_table[current_line_number].address = LOCCTR;
 	program_length = LOCCTR - starting_address;
 
 }
 
-int main() {
-	//Enter "pass1 <input-file-name>" to start
-	//pass1 input.txt
-
+void runPass1(string input){
 	loadOpTable("optable.txt");
-	bool error = true;
-	while(error){
-		cout << "Enter 'pass1 <input-file-name>' to start, Ex : pass1 input.txt" <<endl;
-		string input;
-		getline(cin, input);
-		smatch m;
-		regex r("^pass1\\s+(\\S+)$");
-		regex_search(input, m, r);
-		if (m.size() > 0) {
-			error = false;
-			pass1_Algorithm(m[1].str());
-			write_listing_file();
-		}else{
-			cout << "File name format is not correct" <<endl<<endl;
-		}
-	}
-	write_listing_file();
+	pass1_Algorithm(input);
+	write_listing_file("ListingTable.txt");
 	write_symbol_table();
-	return 0;
 }
+
+//int main() {
+//	//Enter "pass1 <input-file-name>" to start
+//	//pass1 input.txt
+//
+//	loadOpTable("optable.txt");
+//	bool error = true;
+//	while(error){
+//		cout << "Enter 'pass1 <input-file-name>' to start, Ex : pass1 input.txt" <<endl;
+//		string input;
+//		getline(cin, input);
+//		smatch m;
+//		regex r("^pass1\\s+(\\S+)$");
+//		regex_search(input, m, r);
+//		if (m.size() > 0) {
+//			error = false;
+//			pass1_Algorithm(m[1].str());
+//			write_listing_file();
+//		}else{
+//			cout << "File name format is not correct" <<endl<<endl;
+//		}
+//	}
+//	write_listing_file();
+//	write_symbol_table();
+//	return 0;
+//}

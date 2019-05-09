@@ -44,10 +44,15 @@ extern unsigned int LOCCTR;
 extern int base;
 extern int address;
 
+void runPass1(string input);
+void write_listing_file(string fileName);
 void build_listing_table(string path);
 bool handleDirective(listing_line x);
 bool isDirective(string x);
 bool isRelocatable(string exp);
 bool isAbsluteExp(string exp);
+bool handleBasePass2(unsigned int lineNumber);
+string byteObCode(unsigned int lineNumber);
+string wordObCode(unsigned int lineNumber);
 
 #endif /* ASSEMBLERDATA_H_ */
