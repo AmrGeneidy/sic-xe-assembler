@@ -2,16 +2,16 @@
 .Label.  Opcode  The  O p e r a n d 
 .   
          START   0000
-    BGN      LDF     #5 
+    BGN      LDA     #5 
          STA     ALPHA
          +LDCH    #90
   aaa    equ     bgn+12     
       STCH    C1
-aaa     lda  #5
+     lda  #5
          J       *
 .
 ALPHA    RESW    1
 xxx      equ     alpha-aaa 
 C1       RESB    1
 ta       byte c'fjdfq'
- dds        END     BGN 
+       END     BGN 
