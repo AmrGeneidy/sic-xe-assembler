@@ -390,14 +390,14 @@ string byteObCode(unsigned int lineNumber) {
 	string operand = listing_table[lineNumber].operand;
 	string ans = "";
 	if (operand[0] == 'x' || operand[0] == 'X') {
-		int i = 2;
+//		int i = 2;
 		ans = operand.substr(2, operand.size() - 3);
 //		while (i <= operand.size() - 3) {
 //			ans = ans+ bintohex(intToBinaryString(stoi(operand.substr(i, 2), 0, 16),1));
 //			i += 2;
 //		}
 	} else {
-		int i = 2;
+		unsigned int i = 2;
 		while (i <= operand.size() - 2) {
 			ans = ans + bintohex(intToBinaryString(operand[i], 1));
 			i++;
