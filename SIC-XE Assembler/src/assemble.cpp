@@ -238,6 +238,10 @@ void pass2() {
 		if (tRecordStart == -1) {
 			tRecordStart = LOCCTR;
 		}
+		if(!current_line.error.empty()){
+			current_line = listing_table[++current_line_number];
+			continue;
+		}
 
 		//process the line if not a comment
 		if (!current_line.isAllComment) {
@@ -262,7 +266,6 @@ void pass2() {
 					tRecords.push_back(objectCode);
 				}else if (iequals(current_line.mnemonic, "BYTE")){
 					objectCode = byteObCode(current_line_number);
-					cout << objectCode << endl;
 					tRecordLength += objectCode.size();
 					tRecords.push_back(objectCode);
 				}
@@ -274,7 +277,7 @@ void pass2() {
 				tRecords.erase(tRecords.end() - 1);
 				tRecordLength -= tempRecord.size();
 				file << bintohex(intToBinaryString(tRecordLength / 2, 2));
-				for (int i = 0; i < tRecords.size(); i++) {
+				for (unsigned int i = 0; i < tRecords.size(); i++) {
 					file << tRecords.at(i);
 				}
 				file << "\n";
