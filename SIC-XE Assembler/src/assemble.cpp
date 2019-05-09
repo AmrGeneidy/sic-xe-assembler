@@ -97,7 +97,10 @@ bool instructionToObjectCode(unsigned int line_number) {
 		}
 		return true;
 	}
+	cout <<objectCode << endl;
+
 	objectCode = hextobin(opTable[mnemonic].opcode).substr(0, 6);
+	cout <<objectCode << endl;
 	string last2chars = "";
 	last2chars.push_back(operand[operand.size() - 2]);
 	last2chars.push_back(operand[operand.size() - 1]);
@@ -120,8 +123,8 @@ bool instructionToObjectCode(unsigned int line_number) {
 				}
 				//bpe = 001
 				objectCode.append("001");
-				objectCode = bintohex(objectCode);
 				objectCode.append(intToBinaryString(stoi(operand), 5));
+				objectCode = bintohex(objectCode);
 			} else {
 				if (stoi(operand) < 0 || stoi(operand) > 4095) {
 					//4095 dec = fff hex
@@ -131,9 +134,10 @@ bool instructionToObjectCode(unsigned int line_number) {
 				}
 				//bpe = 000
 				objectCode.append("000");
-				objectCode = bintohex(objectCode);
 				objectCode.append(intToBinaryString(stoi(operand), 3));
+				objectCode = bintohex(objectCode);
 			}
+			cout <<objectCode << endl;
 			return true;
 		}
 		//TODO evaluate expression
@@ -156,7 +160,8 @@ bool instructionToObjectCode(unsigned int line_number) {
 	if (format == 4) {
 		//TODO modification record
 		objectCode.append("001");
-		objectCode.append(bintohex(intToBinaryString(TA, 5)));
+		objectCode.append(intToBinaryString(TA, 5));
+		objectCode = bintohex(objectCode);
 	} else {
 		int disp = TA - (LOCCTR + format);
 		if (-2048 <= disp && disp <= 2047) {
@@ -174,7 +179,9 @@ bool instructionToObjectCode(unsigned int line_number) {
 				return false;
 			}
 		}
-		objectCode.append(bintohex(intToBinaryString(disp, 3)));
+		objectCode.append(intToBinaryString(disp, 3));
+		objectCode = bintohex(objectCode);
+
 	}
 	if (objectCode.length() != 6 && format == 3) {
 		listing_table[line_number].error.push_back(
@@ -211,6 +218,7 @@ void pass2() {
 		if (current_line.label.size() > 6) {
 			current_line.error.push_back(
 					"Program name is more than 6 characters");
+			file << current_line.label.substr(0, 6);
 		} else {
 			int spacesNum = 6 - current_line.label.size();
 			file << current_line.label;
