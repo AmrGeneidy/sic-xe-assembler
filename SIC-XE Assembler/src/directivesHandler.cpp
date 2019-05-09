@@ -399,7 +399,7 @@ string byteObCode(unsigned int lineNumber) {
 	} else {
 		unsigned int i = 2;
 		while (i <= operand.size() - 2) {
-			ans = ans + bintohex(intToBinaryString(operand[i], 1));
+			ans = ans + bintohex(intToBinaryString(operand[i], 2));
 			i++;
 		}
 	}

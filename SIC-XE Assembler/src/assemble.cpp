@@ -88,6 +88,7 @@ bool instructionToObjectCode(unsigned int line_number) {
 		}
 
 	}
+	objectCode = hextobin(opTable[mnemonic].opcode).substr(0, 6);
 	//handle special case RSUB has no operand
 	if (mnemonic == "RSUB") {
 		objectCode = bintohex(objectCode.append("110000"));
@@ -97,10 +98,6 @@ bool instructionToObjectCode(unsigned int line_number) {
 		}
 		return true;
 	}
-	cout <<objectCode << endl;
-
-	objectCode = hextobin(opTable[mnemonic].opcode).substr(0, 6);
-	cout <<objectCode << endl;
 	string last2chars = "";
 	last2chars.push_back(operand[operand.size() - 2]);
 	last2chars.push_back(operand[operand.size() - 1]);
@@ -137,7 +134,6 @@ bool instructionToObjectCode(unsigned int line_number) {
 				objectCode.append(intToBinaryString(stoi(operand), 3));
 				objectCode = bintohex(objectCode);
 			}
-			cout <<objectCode << endl;
 			return true;
 		}
 		//TODO evaluate expression
@@ -206,9 +202,6 @@ void pass2() {
 	}
 
 	current_line = listing_table[current_line_number];
-	if (!current_line.error.empty()) {
-		return;
-	}
 	ofstream file;
 	file.open("ObjectCodeFile.txt");
 	file << "H";
@@ -240,7 +233,7 @@ void pass2() {
 	vector<string> tRecords;
 	string tempRecord;
 
-	while (!iequals(current_line.mnemonic, "END") && current_line.error.empty()) {
+	while (!iequals(current_line.mnemonic, "END")) {
 		LOCCTR = current_line.address;
 		if (tRecordStart == -1) {
 			tRecordStart = LOCCTR;
@@ -269,6 +262,7 @@ void pass2() {
 					tRecords.push_back(objectCode);
 				}else if (iequals(current_line.mnemonic, "BYTE")){
 					objectCode = byteObCode(current_line_number);
+					cout << objectCode << endl;
 					tRecordLength += objectCode.size();
 					tRecords.push_back(objectCode);
 				}
