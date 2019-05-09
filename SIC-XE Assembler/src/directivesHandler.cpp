@@ -370,7 +370,7 @@ bool handleBase(listing_line x) {
 	return true;
 }
 
-void wordObCode(unsigned int lineNumber) {
+string wordObCode(unsigned int lineNumber) {
 	string operand = listing_table[lineNumber].operand;
 	string ans = "";
 	if (isArray(operand)) {
@@ -384,6 +384,7 @@ void wordObCode(unsigned int lineNumber) {
 		int x = stoi(operand);
 		ans = ans + bintohex(intToBinaryString(x, 6));
 	}
+	return ans;
 }
 string byteObCode(unsigned int lineNumber) {
 	string operand = listing_table[lineNumber].operand;
