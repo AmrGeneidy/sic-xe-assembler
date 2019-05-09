@@ -292,7 +292,7 @@ void pass2() {
 					file << "T";
 					file << bintohex(intToBinaryString(tRecordStart, 6));
 					file << bintohex(intToBinaryString(tRecordLength / 2, 2));
-					for (int i = 0; i < tRecords.size(); i++) {
+					for (unsigned int i = 0; i < tRecords.size(); i++) {
 						file << tRecords.at(i);
 					}
 					file << "\n";
@@ -310,7 +310,7 @@ void pass2() {
 		file << "T";
 		file << bintohex(intToBinaryString(tRecordStart, 6));
 		file << bintohex(intToBinaryString(tRecordLength / 2, 2));
-		for (int i = 0; i < tRecords.size(); i++) {
+		for (unsigned int i = 0; i < tRecords.size(); i++) {
 			file << tRecords.at(i);
 		}
 		file << "\n";
@@ -332,4 +332,5 @@ int main() {
 	runPass1("input.txt");
 	pass2();
 	write_listing_file("pass2_error_report.txt");
+
 }

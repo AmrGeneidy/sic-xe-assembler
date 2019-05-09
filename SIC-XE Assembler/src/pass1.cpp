@@ -214,7 +214,7 @@ void pass1_Algorithm(string codePath) {
 		}
 		current_line = listing_table[current_line_number];
 		if(iequals(current_line.mnemonic, "END") && !current_line.label.empty()){
-			current_line.error.push_back("Label field must be blank in END instruction !!");
+			listing_table[current_line_number].error.push_back("Label field must be blank in END instruction !!");
 		}
 	}
 	listing_table[current_line_number].address = LOCCTR;
