@@ -23,7 +23,7 @@ unsigned int LOCCTR;
 listing_line current_line;
 
 void loadOpTable(string path) {
-	if(exists_test0(path)){
+	if (exists_test0(path)) {
 		string line;
 		ifstream infile;
 		infile.open(path);
@@ -37,47 +37,49 @@ void loadOpTable(string path) {
 		infile.close();
 	}
 }
-void write_symbol_table(){
+void write_symbol_table() {
 	ofstream file;
 	file.open("SymbolTable.txt");
 	file << "Symbol   Value   Relative(R)/Absolute(A)\n\n";
 	map<string, symbol_struct>::iterator itr;
 	for (itr = symbol_table.begin(); itr != symbol_table.end(); itr++) {
-		    string k =  itr->first;
-		    file << k;
-		    unsigned int spaces = 9-k.size();
-		    while(spaces > 0){
-		    	file << " ";
-		    	spaces--;
-		    }
-			std::stringstream ss;
-			ss << std::hex << itr->second.address; // int decimal_value
-			std::string res(ss.str());
-
-			int temp = 6 - res.length();
-			while (temp > 0) {
-				res = "0" + res;
-				temp--;
-			}
-			file << res;
-			unsigned int spaces1 = 19-res.size();
-			while(spaces1 > 0){
-				file << " ";
-				spaces1--;
-			}
-			file << itr->second.type;
-			file << "\n";
+		string k = itr->first;
+		file << k;
+		unsigned int spaces = 9 - k.size();
+		while (spaces > 0) {
+			file << " ";
+			spaces--;
 		}
-}
+		std::stringstream ss;
+		ss << std::hex << itr->second.address; // int decimal_value
+		std::string res(ss.str());
 
-void write_listing_file(string fileName) {
+		int temp = 6 - res.length();
+		while (temp > 0) {
+			res = "0" + res;
+			temp--;
+		}
+		file << res;
+		unsigned int spaces1 = 19 - res.size();
+		while (spaces1 > 0) {
+			file << " ";
+			spaces1--;
+		}
+		file << itr->second.type;
+		file << "\n";
+	}
+}
+void write_listing_file2(string fileName) {
 	ofstream file;
 	file.open(fileName);
-	file << "Line no. Address Label    Mnemonic  Operand          Comments\n\n";
+	file << "Line no. Address Label    Mnemonic  Operand          Object Code\n\n";
 	map<unsigned int, listing_line>::iterator itr;
 	int i = 0;
 	bool flag = false;
 	for (itr = listing_table.begin(); itr != listing_table.end(); itr++) {
+		if (itr->second.isAllComment) {
+			continue;
+		}
 		i++;
 		if (flag) {
 			unsigned int t = 0;
@@ -87,8 +89,7 @@ void write_listing_file(string fileName) {
 				file << "\n";
 			}
 			flag = false;
-		}
-		else if (!listing_table[i - 1].error.empty()) {
+		} else if (!listing_table[i - 1].error.empty()) {
 			flag = true;
 		}
 		if (i < 10) {
@@ -110,21 +111,104 @@ void write_listing_file(string fileName) {
 			res = "0" + res;
 			temp--;
 		}
-		file << res;
+		file << getUpperVersion(res);
 		file << "  ";
 		file << itr->second.label;
-		unsigned int spaces2 = 9-itr->second.label.size();
-		while(spaces2 > 0){
+		unsigned int spaces2 = 9 - itr->second.label.size();
+		while (spaces2 > 0) {
 			file << " ";
 			spaces2--;
 		}
-		if (itr->second.isFormat4){
-			file << '+'<<itr->second.mnemonic;
-		}else{
+		if (itr->second.isFormat4) {
+			file << '+' << itr->second.mnemonic;
+		} else {
 			file << itr->second.mnemonic;
 		}
 		unsigned int spaces1 = 10 - itr->second.mnemonic.size();
-		if(itr->second.isFormat4){
+		if (itr->second.isFormat4) {
+			spaces1--;
+		}
+		while (spaces1 > 0) {
+			file << " ";
+			spaces1--;
+		}
+
+		file << itr->second.operand;
+		unsigned int spaces = 17 - itr->second.operand.size();
+		while (spaces > 0) {
+			file << " ";
+			spaces--;
+		}
+		file << itr->second.objectCode;
+		file << "\n";
+	}
+	if (flag) {
+		unsigned int t = 0;
+		for (t = 0; t < listing_table[i - 1].error.size(); t++) {
+			file << "      ****Error: ";
+			file << listing_table[i - 1].error.at(t);
+			file << "\n";
+		}
+		flag = false;
+	}
+	file.close();
+}
+
+
+void write_listing_file(string fileName) {
+	ofstream file;
+	file.open(fileName);
+	file << "Line no. Address Label    Mnemonic  Operand          Comments\n\n";
+	map<unsigned int, listing_line>::iterator itr;
+	int i = 0;
+	bool flag = false;
+	for (itr = listing_table.begin(); itr != listing_table.end(); itr++) {
+		i++;
+		if (flag) {
+			unsigned int t = 0;
+			for (t = 0; t < listing_table[i - 2].error.size(); t++) {
+				file << "      ****Error: ";
+				file << listing_table[i - 2].error.at(t);
+				file << "\n";
+			}
+			flag = false;
+		} else if (!listing_table[i - 1].error.empty()) {
+			flag = true;
+		}
+		if (i < 10) {
+			file << i;
+			file << "        ";
+		} else if (i < 100) {
+			file << i;
+			file << "       ";
+		} else if (i < 1000) {
+			file << i;
+			file << "      ";
+		}
+		std::stringstream ss;
+		ss << std::hex << itr->second.address; // int decimal_value
+		std::string res(ss.str());
+
+		int temp = 6 - res.length();
+		while (temp > 0) {
+			res = "0" + res;
+			temp--;
+		}
+		file << getUpperVersion(res);
+		file << "  ";
+		file << itr->second.label;
+		unsigned int spaces2 = 9 - itr->second.label.size();
+		while (spaces2 > 0) {
+			file << " ";
+			spaces2--;
+		}
+		if (itr->second.isFormat4) {
+			file << '+' << itr->second.mnemonic;
+		} else {
+			file << itr->second.mnemonic;
+		}
+		unsigned int spaces1 = 10 - itr->second.mnemonic.size();
+		if (itr->second.isFormat4) {
 			spaces1--;
 		}
 		while (spaces1 > 0) {
@@ -140,6 +224,15 @@ void write_listing_file(string fileName) {
 		}
 		file << itr->second.comment;
 		file << "\n";
+	}
+	if (flag) {
+		unsigned int t = 0;
+		for (t = 0; t < listing_table[i - 1].error.size(); t++) {
+			file << "      ****Error: ";
+			file << listing_table[i - 1].error.at(t);
+			file << "\n";
+		}
+		flag = false;
 	}
 	file.close();
 }
@@ -208,13 +301,16 @@ void pass1_Algorithm(string codePath) {
 		}				//end line process
 
 		++current_line_number;
-		if(listing_table.find(current_line_number) == listing_table.end()){
-			listing_table[current_line_number - 1].error.push_back("There is no End directive");
+		if (listing_table.find(current_line_number) == listing_table.end()) {
+			listing_table[current_line_number - 1].error.push_back(
+					"There is no End directive");
 			break;
 		}
 		current_line = listing_table[current_line_number];
-		if(iequals(current_line.mnemonic, "END") && !current_line.label.empty()){
-			listing_table[current_line_number].error.push_back("Label field must be blank in END instruction !!");
+		if (iequals(current_line.mnemonic, "END")
+				&& !current_line.label.empty()) {
+			listing_table[current_line_number].error.push_back(
+					"Label field must be blank in END instruction !!");
 		}
 	}
 	listing_table[current_line_number].address = LOCCTR;
@@ -222,7 +318,7 @@ void pass1_Algorithm(string codePath) {
 
 }
 
-void runPass1(string input){
+void runPass1(string input) {
 	loadOpTable("optable.txt");
 	pass1_Algorithm(input);
 	write_listing_file("ListingTable.txt");

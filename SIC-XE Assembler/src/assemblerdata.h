@@ -24,6 +24,7 @@ struct listing_line {
 	string operand;
 	string comment;
 	vector<string> error;
+	string objectCode;
 };
 
 struct symbol_struct{
@@ -49,6 +50,7 @@ extern listing_line current_line;
 
 void runPass1(string input);
 void write_listing_file(string fileName);
+void write_listing_file2(string fileName);
 void build_listing_table(string path);
 bool handleDirective(listing_line x);
 bool isDirective(string x);

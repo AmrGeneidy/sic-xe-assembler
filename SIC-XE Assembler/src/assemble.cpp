@@ -203,8 +203,8 @@ void pass2() {
 
 	current_line = listing_table[current_line_number];
 	ofstream file;
-	file.open("ObjectCodeFile.txt");
-	file << "H";
+	file.open("ObjectProgram.txt");
+	file << "H^";
 
 	//check start mnemonic (Program name)
 	if (iequals(current_line.mnemonic, "START")) {
@@ -223,8 +223,10 @@ void pass2() {
 	} else {
 		file << "      ";
 	}
+	file << "^";
 	LOCCTR = starting_address;
 	file << bintohex(intToBinaryString(starting_address, 6));
+	file << "^";
 	file << bintohex(intToBinaryString(program_length, 6));
 	file << "\n";
 	//max length of tRecord = 30 bytes (0x1E) = 60 hex digits
@@ -251,6 +253,7 @@ void pass2() {
 				if (instructionToObjectCode(current_line_number)){
 					tRecordLength += objectCode.size();
 					tRecords.push_back(objectCode);
+					listing_table[current_line_number].objectCode =  objectCode;
 				}
 			}else{
 				//directive
@@ -258,28 +261,36 @@ void pass2() {
 					base = -1;
 				}else if (iequals(current_line.mnemonic, "BASE")){
 					if(!handleBasePass2(current_line_number)) {
-						current_line.error.push_back("Error in BASE operand");
+						listing_table[current_line_number].error.push_back("Error in BASE operand");
 					}
 				}else if (iequals(current_line.mnemonic, "WORD")){
 					objectCode = wordObCode(current_line_number);
 					tRecordLength += objectCode.size();
 					tRecords.push_back(objectCode);
+					listing_table[current_line_number].objectCode =  objectCode;
 				}else if (iequals(current_line.mnemonic, "BYTE")){
 					objectCode = byteObCode(current_line_number);
 					tRecordLength += objectCode.size();
 					tRecords.push_back(objectCode);
+					listing_table[current_line_number].objectCode =  objectCode;
 				}
 			}
 			if (tRecordLength > 60) {
-				file << "T";
+				file << "T^";
 				file << bintohex(intToBinaryString(tRecordStart, 6));
+				file << "^";
 				tempRecord = tRecords.back();
 				tRecords.erase(tRecords.end() - 1);
 				tRecordLength -= tempRecord.size();
 				file << bintohex(intToBinaryString(tRecordLength / 2, 2));
-				for (unsigned int i = 0; i < tRecords.size(); i++) {
+				file << "^";
+				int temp;
+				for (unsigned int i = 0; i < tRecords.size() - 1; i++) {
 					file << tRecords.at(i);
+					file << "^";
+					temp = i;
 				}
+				file << tRecords.at(temp + 1);
 				file << "\n";
 				tRecords.clear();
 				tRecords.push_back(tempRecord);
@@ -289,12 +300,18 @@ void pass2() {
 					|| iequals(current_line.mnemonic, "RESB")
 					|| iequals(current_line.mnemonic, "ORG")) {
 				if (!tRecords.empty()) {
-					file << "T";
+					file << "T^";
 					file << bintohex(intToBinaryString(tRecordStart, 6));
+					file << "^";
 					file << bintohex(intToBinaryString(tRecordLength / 2, 2));
-					for (unsigned int i = 0; i < tRecords.size(); i++) {
+					file << "^";
+					int temp;
+					for (unsigned int i = 0; i < tRecords.size() - 1; i++) {
 						file << tRecords.at(i);
+						file << "^";
+						temp = i;
 					}
+					file << tRecords.at(temp + 1);
 					file << "\n";
 					tRecords.clear();
 					tRecordLength = 0;
@@ -307,19 +324,25 @@ void pass2() {
 		current_line = listing_table[++current_line_number];
 	}
 	if (iequals(current_line.mnemonic, "END")) {
-		file << "T";
+		file << "T^";
 		file << bintohex(intToBinaryString(tRecordStart, 6));
+		file << "^";
 		file << bintohex(intToBinaryString(tRecordLength / 2, 2));
-		for (unsigned int i = 0; i < tRecords.size(); i++) {
+		file << "^";
+		int temp;
+		for (unsigned int i = 0; i < tRecords.size() - 1; i++) {
 			file << tRecords.at(i);
+			file << "^";
+			temp = i;
 		}
+		file << tRecords.at(temp + 1);
 		file << "\n";
-		file << "E";
+		file << "E^";
 		if(!current_line.operand.empty()){
 			if(isOperandToTargetAddress(current_line.operand)){
 				file << bintohex(intToBinaryString(address, 6));
 			}else{
-				current_line.error.push_back("Error in End operand !!");
+				listing_table[current_line_number].error.push_back("Error in End operand !!");
 			}
 		}else{
 			file << "000000";
@@ -331,6 +354,6 @@ void pass2() {
 int main() {
 	runPass1("input.txt");
 	pass2();
-	write_listing_file("pass2_error_report.txt");
+	write_listing_file2("ObjectCode.txt");
 
 }
