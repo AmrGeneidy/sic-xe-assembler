@@ -240,7 +240,7 @@ void pass2() {
 		if (tRecordStart == -1) {
 			tRecordStart = LOCCTR;
 		}
-		if(!current_line.error.empty()){
+		if (!current_line.error.empty()) {
 			current_line = listing_table[++current_line_number];
 			continue;
 		}
@@ -250,29 +250,30 @@ void pass2() {
 			string mnemonic = getUpperVersion(current_line.mnemonic);
 			if (opTable.find(mnemonic) != opTable.end()) {
 				//not directive
-				if (instructionToObjectCode(current_line_number)){
+				if (instructionToObjectCode(current_line_number)) {
 					tRecordLength += objectCode.size();
 					tRecords.push_back(objectCode);
-					listing_table[current_line_number].objectCode =  objectCode;
+					listing_table[current_line_number].objectCode = objectCode;
 				}
-			}else{
+			} else {
 				//directive
-				if(iequals(current_line.mnemonic, "NOBASE")){
+				if (iequals(current_line.mnemonic, "NOBASE")) {
 					base = -1;
-				}else if (iequals(current_line.mnemonic, "BASE")){
-					if(!handleBasePass2(current_line_number)) {
-						listing_table[current_line_number].error.push_back("Error in BASE operand");
+				} else if (iequals(current_line.mnemonic, "BASE")) {
+					if (!handleBasePass2(current_line_number)) {
+						listing_table[current_line_number].error.push_back(
+								"Error in BASE operand");
 					}
-				}else if (iequals(current_line.mnemonic, "WORD")){
+				} else if (iequals(current_line.mnemonic, "WORD")) {
 					objectCode = wordObCode(current_line_number);
 					tRecordLength += objectCode.size();
 					tRecords.push_back(objectCode);
-					listing_table[current_line_number].objectCode =  objectCode;
-				}else if (iequals(current_line.mnemonic, "BYTE")){
+					listing_table[current_line_number].objectCode = objectCode;
+				} else if (iequals(current_line.mnemonic, "BYTE")) {
 					objectCode = byteObCode(current_line_number);
 					tRecordLength += objectCode.size();
 					tRecords.push_back(objectCode);
-					listing_table[current_line_number].objectCode =  objectCode;
+					listing_table[current_line_number].objectCode = objectCode;
 				}
 			}
 			if (tRecordLength > 60) {
@@ -338,22 +339,31 @@ void pass2() {
 		file << tRecords.at(temp + 1);
 		file << "\n";
 		file << "E^";
-		if(!current_line.operand.empty()){
-			if(isOperandToTargetAddress(current_line.operand)){
+		if (!current_line.operand.empty()) {
+			if (isOperandToTargetAddress(current_line.operand)) {
 				file << bintohex(intToBinaryString(address, 6));
-			}else{
-				listing_table[current_line_number].error.push_back("Error in End operand !!");
+			} else {
+				listing_table[current_line_number].error.push_back(
+						"Error in End operand !!");
 			}
-		}else{
+		} else {
 			file << "000000";
 		}
 	}
 	file.close();
 }
 
-int main(int argc, char *argv[]) {
-	runPass1(argv[1]);
-	pass2();
-	write_listing_file2("ObjectCode.txt");
-
+int main() {
+	//Enter "assemble <input-file-name>" to start
+	//assemble input.txt
+	string input;
+	getline(cin, input);
+	smatch m;
+	regex r("^assemble\\s+(\\S+)$");
+	regex_search(input, m, r);
+	if (m.size() > 0) {
+		runPass1(m[1].str());
+		pass2();
+		write_listing_file2("ObjectCode.txt");
+	}
 }
