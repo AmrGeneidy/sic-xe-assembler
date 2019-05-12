@@ -351,8 +351,8 @@ void pass2() {
 	file.close();
 }
 
-int main() {
-	runPass1("input.txt");
+int main(int argc, char *argv[]) {
+	runPass1(argv[1]);
 	pass2();
 	write_listing_file2("ObjectCode.txt");
 
