@@ -1,54 +1,18 @@
 Line no. Address Label    Mnemonic  Operand          Comments
 
-1        000000  COPY     START     0                
-2        000000  FIRST    STL       RETADR           
-3        000003           LDB       #LENGTH          
-4        000006           BASE      LENGTH           
-5        000006  CLOOP    +JSUB     RDREC            
-6        00000A           LDA       LENGTH           
-7        00000D           COMP      #0               
-8        000010           JEQ       ENDFIL           
-9        000013           +JSUB     WRREC            
-10       000017           J         CLOOP            
-11       00001A  ENDFIL   LDA       EOF              
-12       00001D           STA       BUFFER           
-13       000020           LDA       #3               
-14       000023           STA       LENGTH           
-15       000026           +JSUB     WRREC            
-16       00002A           J         @RETADR          
-17       00002D  EOF      BYTE      C'EOF'           
-18       000030  RETADR   RESW      1                
-19       000033  LENGTH   RESW      1                
-20       000036  BUFFER   RESB      4096             
-21       001036                                      .
-22       001036                                      .        SUBROUTINE TO READ RECORD INTO BUFFER
-23       001036                                      .
-24       001036  RDREC    CLEAR     X                
-25       001038           CLEAR     A                
-26       00103A           CLEAR     S                
-27       00103C           +LDT      #4096            
-28       001040  RLOOP    TD        INPUT            
-29       001043           JEQ       RLOOP            
-30       001046           RD        INPUT            
-31       001049           COMPR     A,S              
-32       00104B           JEQ       EXIT             
-33       00104E           STCH      BUFFER,X         
-34       001051           TIXR      T                
-35       001053           JLT       RLOOP            
-36       001056  EXIT     STX       LENGTH           
-37       001059           RSUB                       
-38       00105C  INPUT    BYTE      X'F1'            
-39       00105D                                      .        
-40       00105D                                      .        SUBROUTINE TO WRITE RECORD FROM BUFFER
-41       00105D                                      .
-42       00105D  WRREC    CLEAR     X                
-43       00105F           LDT       LENGTH           
-44       001062  WLOOP    TD        OUTPUT           
-45       001065           JEQ       WLOOP            
-46       001068           LDCH      BUFFER,X         
-47       00106B           WD        OUTPUT           
-48       00106E           TIXR      T                
-49       001070           JLT       WLOOP            
-50       001073           RSUB                       
-51       001076  OUTPUT   BYTE      X'05'            
-52       001077           END       FIRST            
+1        000000  Sum      start     0                
+2        000000  FIRST    LDX       #0               
+3        000003           LDA       #0               
+4        000006           +LDB      #TABLE2          
+5        00000A           Base      TABLE2           
+6        00000A  Loop     ADD       TABLE,X          
+7        00000D           ADD       TABLE2,X         
+8        000010           Tix       count            
+9        000013           JLT       Loop             
+10       000016           +STA      TOTAL            
+11       00001A           RSUB                       
+12       00001D  count    RESW      1                
+13       000020  TABLE    RESW      2000             
+14       001790  TABLE2   RESW      2000             
+15       002F00  TOTAL    RESW      1                
+16       002F03           END       FIRST            

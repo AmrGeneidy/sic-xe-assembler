@@ -46,6 +46,7 @@ extern int base;
 extern int address;
 extern unsigned int current_line_number;
 extern listing_line current_line;
+extern bool errorInPass1;
 
 
 void runPass1(string input);

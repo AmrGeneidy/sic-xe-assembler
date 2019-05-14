@@ -1,16 +1,8 @@
 Symbol   Value   Relative(R)/Absolute(A)
 
-BUFFER   000036             R
-CLOOP    000006             R
-ENDFIL   00001a             R
-EOF      00002d             R
-EXIT     001056             R
+COUNT    00001d             R
 FIRST    000000             R
-INPUT    00105c             R
-LENGTH   000033             R
-OUTPUT   001076             R
-RDREC    001036             R
-RETADR   000030             R
-RLOOP    001040             R
-WLOOP    001062             R
-WRREC    00105d             R
+LOOP     00000a             R
+TABLE    000020             R
+TABLE2   001790             R
+TOTAL    002f00             R

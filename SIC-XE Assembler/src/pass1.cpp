@@ -21,6 +21,7 @@ unsigned int program_length;
 unsigned int current_line_number;
 unsigned int LOCCTR;
 listing_line current_line;
+bool errorInPass1 = false;
 
 void loadOpTable(string path) {
 	if (exists_test0(path)) {
@@ -165,6 +166,7 @@ void write_listing_file(string fileName) {
 	for (itr = listing_table.begin(); itr != listing_table.end(); itr++) {
 		i++;
 		if (flag) {
+			errorInPass1 = true;
 			unsigned int t = 0;
 			for (t = 0; t < listing_table[i - 2].error.size(); t++) {
 				file << "      ****Error: ";
@@ -226,6 +228,7 @@ void write_listing_file(string fileName) {
 		file << "\n";
 	}
 	if (flag) {
+		errorInPass1 = true;
 		unsigned int t = 0;
 		for (t = 0; t < listing_table[i - 1].error.size(); t++) {
 			file << "      ****Error: ";

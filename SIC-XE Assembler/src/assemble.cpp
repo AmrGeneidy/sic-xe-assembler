@@ -324,7 +324,7 @@ void pass2() {
 		}
 		current_line = listing_table[++current_line_number];
 	}
-	if (iequals(current_line.mnemonic, "END")) {
+	if (iequals(current_line.mnemonic, "END") && !tRecords.empty()) {
 		file << "T^";
 		file << bintohex(intToBinaryString(tRecordStart, 6));
 		file << "^";
@@ -338,6 +338,8 @@ void pass2() {
 		}
 		file << tRecords.at(temp + 1);
 		file << "\n";
+	}
+	if (iequals(current_line.mnemonic, "END")) {
 		file << "E^";
 		if (!current_line.operand.empty()) {
 			if (isOperandToTargetAddress(current_line.operand)) {
@@ -356,6 +358,7 @@ void pass2() {
 int main() {
 	//Enter "assemble <input-file-name>" to start
 	//assemble input.txt
+
 	string input;
 	getline(cin, input);
 	smatch m;
@@ -363,7 +366,9 @@ int main() {
 	regex_search(input, m, r);
 	if (m.size() > 0) {
 		runPass1(m[1].str());
-		pass2();
-		write_listing_file2("ObjectCode.txt");
+		if(!errorInPass1){
+			pass2();
+			write_listing_file2("ObjectCode.txt");
+		}
 	}
 }
